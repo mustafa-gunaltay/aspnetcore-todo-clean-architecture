@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TodoBackend.Domain\TodoBackend.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Authentication\" />
+    <Folder Include="Features\TodoCategory\Commands\CreateCategory\" />
+    <Folder Include="Features\TodoCategory\Commands\DeleteCategory\" />
+    <Folder Include="Features\TodoTaskItem\" />
+    <Folder Include="Features\TodoCategory\Queries\" />
+    <Folder Include="Features\TodoUser\" />
+    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="MediatR" Version="13.0.0" />
+  </ItemGroup>
+
+</Project>

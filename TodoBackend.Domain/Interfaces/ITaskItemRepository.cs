@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TodoBackend.Domain.Enums;
+using TodoBackend.Domain.Models;
+
+namespace TodoBackend.Domain.Interfaces;
+
+public interface ITaskItemRepository : BuildingBlocks.IRepository<TaskItem>
+{
+    // User'a göre filtreleme (temel gereksinim)
+    Task<IReadOnlyList<TaskItem>> GetTasksByUserIdAsync(int userId, CancellationToken ct = default);
+
+    // Filtreleme ve sayfalama (gereksinimlerden)
+    Task<IReadOnlyList<TaskItem>> GetFilteredAsync(
+        int userId,
+        bool? isCompleted = null,
+        Priority? priority = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        int? categoryId = null,
+        CancellationToken ct = default);
+
+
+    // High priority görevler için DueDate kontrolü
+    Task<IReadOnlyList<TaskItem>> GetOverdueTasksAsync(int userId, CancellationToken ct = default);
+    Task<IReadOnlyList<TaskItem>> GetUpcomingTasksAsync(int userId, int days = 7, CancellationToken ct = default);
+}
