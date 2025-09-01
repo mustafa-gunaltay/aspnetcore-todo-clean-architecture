@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace TodoBackend.Domain.Models.BuildingBlocks;
 
-public abstract class AuiditableEntity : Entity
+public abstract class AuditableEntity : Entity
 {
 
     public DateTime CreatedAt { get; private set; }
     public string CreatedBy { get; private set; } = string.Empty;
     public DateTime? UpdatedAt { get; private set; }
-    public string? UpdatedBy { get; private set; }
+    public string UpdatedBy { get; private set; } = string.Empty;
     public bool IsDeleted { get; private set; } = false;
     public DateTime? DeletedAt { get; private set; }
-    public string? DeletedBy { get; private set; }
+    public string DeletedBy { get; private set; } = string.Empty;
 
     public void Created(string createdBy)
     {

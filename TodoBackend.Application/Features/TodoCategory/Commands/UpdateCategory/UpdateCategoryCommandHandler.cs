@@ -1,43 +1,55 @@
-﻿using MediatR;
-using TodoBackend.Domain.Interfaces;
+using MediatR;
+using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Domain.DomainExceptions;
-using System;
+using TodoBackend.Domain.Interfaces;
+using TodoBackend.Domain.Models;
 
 namespace TodoBackend.Application.Features.TodoCategory.Commands.UpdateCategory;
 
-public sealed class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, int>
+public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, Result>
 {
     private readonly ITodoCleanArchitectureUnitOfWork _uow;
 
     public UpdateCategoryCommandHandler(ITodoCleanArchitectureUnitOfWork uow)
-        => _uow = uow;
-
-    public async Task<int> Handle(UpdateCategoryCommand request, CancellationToken ct)
     {
-        // 1) Varlığı kontrol et (soft-deleted ise güncellemeye izin verme)
-        var category = await _uow.CategoryRepository.GetByIdAsync(request.CategoryId, ct);
-        if (category is null || category.IsDeleted)
-            throw new ApplicationException("Category not found.");
+        _uow = uow;
+    }
 
-        // 2) İsim değişiyorsa tekillik kontrolü (kullanıcıya özel tekillik repo tarafında sağlanmalı)
-        if (!string.Equals(category.Name, request.Name, StringComparison.Ordinal))
+    public async Task<Result> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
+    {
+        try
         {
-            var exists = await _uow.CategoryRepository.NameExistsAsync(request.Name, ct);
-            if (exists)
-                throw new ApplicationException("Category name must be unique.");
-            category.Rename(request.Name);                 // Domain kuralı: boş/whitespace olamaz
+            // Check if category exists
+            var category = await _uow.CategoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
+            if (category is null)
+            {
+                return Result.Failure("Category not found");
+            }
+
+            // Check if new name is unique (exclude current category)
+            var isNameUnique = await _uow.CategoryRepository.IsNameUniqueAsync(request.Name, request.CategoryId, cancellationToken);
+            if (!isNameUnique)
+            {
+                return Result.Failure("Category name must be unique");
+            }
+
+            // Update properties using domain methods
+            category.Rename(request.Name);
+            category.SetDescription(request.Description);
+
+            // Save changes
+            await _uow.CategoryRepository.UpdateAsync(category, cancellationToken);
+            await _uow.SaveChangesAsync(cancellationToken);
+
+            return Result.Success("Category updated successfully");
         }
-
-        // 3) Açıklamayı güncelle
-        category.SetDescription(request.Description);
-
-        
-        // 4) Kaydet
-        await _uow.CategoryRepository.UpdateAsync(category, ct);
-        var saved = await _uow.SaveChangesAsync(ct);
-        if (!saved)
-            throw new DomainException("Changes could not be saved.");
-
-        return category.Id;
+        catch (DomainException dex)
+        {
+            return Result.Failure(dex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"Failed to update category: {ex.Message}");
+        }
     }
 }

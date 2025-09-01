@@ -10,7 +10,7 @@ using TodoBackend.Domain.DomainExceptions;
 namespace TodoBackend.Domain.Models;
 
 
-public class TaskItem : BuildingBlocks.AuiditableEntity
+public class TaskItem : BuildingBlocks.AuditableEntity
 {
     public string Title { get; private set; } = string.Empty; // NOT NULL, private setter
     public string? Description { get; private set; } // Nullable - DB'de NULL olabilir

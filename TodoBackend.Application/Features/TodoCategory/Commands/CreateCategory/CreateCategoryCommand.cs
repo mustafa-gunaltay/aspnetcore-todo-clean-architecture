@@ -1,11 +1,10 @@
 using MediatR;
 using TodoBackend.Application.Features.BuildingBlocks;
 
-namespace TodoBackend.Application.Features.TodoCategory.Commands.UpdateCategory;
+namespace TodoBackend.Application.Features.TodoCategory.Commands.CreateCategory;
 
-public record UpdateCategoryCommand : IRequest<Result>
+public record CreateCategoryCommand : IRequest<Result<int>>
 {
-    public int CategoryId { get; init; }
     public string Name { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
 }

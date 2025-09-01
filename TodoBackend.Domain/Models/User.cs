@@ -8,7 +8,7 @@ using TodoBackend.Domain.Enums;
 
 namespace TodoBackend.Domain.Models;
 
-public class User : BuildingBlocks.AuiditableEntity
+public class User : BuildingBlocks.AuditableEntity
 {
     public string Email { get; private set; } = string.Empty; // NOT NULL, private setter
     public string Password { get; private set; } = string.Empty; // NOT NULL, private setter

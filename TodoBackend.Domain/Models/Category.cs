@@ -7,7 +7,7 @@ using TodoBackend.Domain.DomainExceptions;
 
 namespace TodoBackend.Domain.Models;
 
-public class Category : BuildingBlocks.AuiditableEntity
+public class Category : BuildingBlocks.AuditableEntity
 {
     public string Name { get; private set; } = string.Empty; // NOT NULL, private setter
     public string Description { get; private set; } = string.Empty; // NOT NULL, private setter

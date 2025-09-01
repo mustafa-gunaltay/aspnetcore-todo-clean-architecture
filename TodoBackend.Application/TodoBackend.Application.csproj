@@ -12,12 +12,8 @@
 
   <ItemGroup>
     <Folder Include="Features\Authentication\" />
-    <Folder Include="Features\TodoCategory\Commands\CreateCategory\" />
-    <Folder Include="Features\TodoCategory\Commands\DeleteCategory\" />
     <Folder Include="Features\TodoTaskItem\" />
-    <Folder Include="Features\TodoCategory\Queries\" />
     <Folder Include="Features\TodoUser\" />
-    <Folder Include="ViewModels\" />
   </ItemGroup>
 
   <ItemGroup>

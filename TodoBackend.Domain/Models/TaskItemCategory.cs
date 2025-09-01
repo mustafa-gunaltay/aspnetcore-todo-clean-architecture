@@ -7,7 +7,7 @@ using TodoBackend.Domain.DomainExceptions;
 
 namespace TodoBackend.Domain.Models;
 
-public class TaskItemCategory : BuildingBlocks.AuiditableEntity
+public class TaskItemCategory : BuildingBlocks.AuditableEntity
 {
     public int TaskItemId { get; private set; } // NOT NULL, FK
     public int CategoryId { get; private set; } // NOT NULL, FK
