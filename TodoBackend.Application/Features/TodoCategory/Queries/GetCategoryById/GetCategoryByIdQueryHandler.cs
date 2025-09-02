@@ -8,9 +8,9 @@ namespace TodoBackend.Application.Features.TodoCategory.Queries.GetCategoryById;
 
 public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery, Result<CategoryViewModel>>
 {
-    private readonly ITodoCleanArchitectureUnitOfWork _uow;
+    private readonly ITodoBackendUnitOfWork _uow;
 
-    public GetCategoryByIdQueryHandler(ITodoCleanArchitectureUnitOfWork uow)
+    public GetCategoryByIdQueryHandler(ITodoBackendUnitOfWork uow)
     {
         _uow = uow;
     }

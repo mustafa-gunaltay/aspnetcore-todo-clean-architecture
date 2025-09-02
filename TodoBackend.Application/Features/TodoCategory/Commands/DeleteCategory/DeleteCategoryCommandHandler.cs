@@ -7,9 +7,9 @@ namespace TodoBackend.Application.Features.TodoCategory.Commands.DeleteCategory;
 
 public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Result>
 {
-    private readonly ITodoCleanArchitectureUnitOfWork _uow;
+    private readonly ITodoBackendUnitOfWork _uow;
 
-    public DeleteCategoryCommandHandler(ITodoCleanArchitectureUnitOfWork uow)
+    public DeleteCategoryCommandHandler(ITodoBackendUnitOfWork uow)
     {
         _uow = uow;
     }

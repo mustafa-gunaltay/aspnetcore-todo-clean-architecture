@@ -8,9 +8,9 @@ namespace TodoBackend.Application.Features.TodoCategory.Commands.UpdateCategory;
 
 public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, Result>
 {
-    private readonly ITodoCleanArchitectureUnitOfWork _uow;
+    private readonly ITodoBackendUnitOfWork _uow;
 
-    public UpdateCategoryCommandHandler(ITodoCleanArchitectureUnitOfWork uow)
+    public UpdateCategoryCommandHandler(ITodoBackendUnitOfWork uow)
     {
         _uow = uow;
     }
@@ -45,10 +45,12 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
         }
         catch (DomainException dex)
         {
+            // Rollback mekanizmasina burada gerek yok EF Core SaveChanges metodundaki hatada otomatik rollback yapar 
             return Result.Failure(dex.Message);
         }
         catch (Exception ex)
         {
+            // Rollback mekanizmasina burada gerek yok EF Core SaveChanges metodundaki hatada otomatik rollback yapar 
             return Result.Failure($"Failed to update category: {ex.Message}");
         }
     }

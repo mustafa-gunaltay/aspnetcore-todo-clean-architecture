@@ -8,9 +8,9 @@ namespace TodoBackend.Application.Features.TodoCategory.Commands.CreateCategory;
 
 public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, Result<int>>
 {
-    private readonly ITodoCleanArchitectureUnitOfWork _uow;
+    private readonly ITodoBackendUnitOfWork _uow;
 
-    public CreateCategoryCommandHandler(ITodoCleanArchitectureUnitOfWork uow)
+    public CreateCategoryCommandHandler(ITodoBackendUnitOfWork uow)
     {
         _uow = uow;
     }

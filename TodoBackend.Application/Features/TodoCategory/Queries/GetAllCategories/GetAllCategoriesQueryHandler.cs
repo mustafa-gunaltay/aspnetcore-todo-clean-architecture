@@ -8,9 +8,9 @@ namespace TodoBackend.Application.Features.TodoCategory.Queries.GetAllCategories
 
 public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, Result<IReadOnlyList<CategoryViewModel>>>
 {
-    private readonly ITodoCleanArchitectureUnitOfWork _uow;
+    private readonly ITodoBackendUnitOfWork _uow;
 
-    public GetAllCategoriesQueryHandler(ITodoCleanArchitectureUnitOfWork uow)
+    public GetAllCategoriesQueryHandler(ITodoBackendUnitOfWork uow)
     {
         _uow = uow;
     }
