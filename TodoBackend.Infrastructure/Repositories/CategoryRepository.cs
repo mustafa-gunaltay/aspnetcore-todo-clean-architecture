@@ -11,7 +11,7 @@ namespace TodoBackend.Infrastructure.Repositories;
 
 public class CategoryRepository : Repository<Category>, ICategoryRepository 
 {
-    public CategoryRepository(TodoBackendDbContext dbContext, User currentUser) : 
+    public CategoryRepository(TodoBackendDbContext dbContext, ICurrentUser currentUser) : 
         base(dbContext, currentUser)
     {
     }   

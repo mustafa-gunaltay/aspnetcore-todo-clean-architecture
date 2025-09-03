@@ -32,6 +32,8 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
             // Save to database
             await _uow.CategoryRepository.AddAsync(category, cancellationToken);
 
+            await _uow.SaveChangesAsync(cancellationToken); // Save changes to the database
+
             // Return success with the new category's ID
             return Result<int>.Success(category.Id, "Category created successfully");
         }

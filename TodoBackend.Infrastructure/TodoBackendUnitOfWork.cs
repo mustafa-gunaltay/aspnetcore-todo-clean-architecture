@@ -8,23 +8,24 @@ using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
 
 namespace TodoBackend.Infrastructure;
 
-public class TodoBackendUnitOfWork : UnitOfWork //, ITodoBackendUnitOfWork
+public class TodoBackendUnitOfWork : UnitOfWork, ITodoBackendUnitOfWork
 {
+    public ICategoryRepository CategoryRepository { get; init; }
+    public ITaskItemRepository TaskItemRepository { get; init; }
+    public IUserRepository UserRepository { get; init; }
+    public ITaskItemCategoryRepository TaskItemCategoryRepository { get; init; }
 
-    public ICategoryRepository CategoryRepository;
-
-    //public ITaskItemRepository TaskItemRepository;
-
-    //public IUserRepository UserRepository;
-
-    //public ITaskItemCategoryRepository TaskItemCategoryRepository;
-
-    public TodoBackendUnitOfWork(TodoBackendDbContext dbcontext, ICategoryRepository categoryRepository/*, ITaskItemRepository TaskItemRepository, IUserRepository UserRepository, ITaskItemCategoryRepository TaskItemCategoryRepository*/)
-    : base(dbcontext)
+    public TodoBackendUnitOfWork(
+        TodoBackendDbContext dbcontext,
+        ICategoryRepository categoryRepository,
+        ITaskItemRepository taskItemRepository,
+        IUserRepository userRepository,
+        ITaskItemCategoryRepository taskItemCategoryRepository)
+        : base(dbcontext)
     {
-        this.CategoryRepository = categoryRepository;
-        //this.TaskItemRepository = todoItemRepository;
-        //this.UserRepository = userRepository;
-        //this.TaskItemCategoryRepository = taskItemCategoryRepository;
+        CategoryRepository = categoryRepository;
+        TaskItemRepository = taskItemRepository;
+        UserRepository = userRepository;
+        TaskItemCategoryRepository = taskItemCategoryRepository;
     }
 }
