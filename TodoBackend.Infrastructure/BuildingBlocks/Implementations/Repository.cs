@@ -33,14 +33,16 @@ public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEnt
 
     public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        if (entity is AuditableEntity trackable)
+        if (entity is AuditableEntity trackable) // "entity is-a AuditableEntity ?" kontrolu yapilir, oyleyse entity -> trackable'a downcast edilir (javadaki instanceof operatoru)
         {
+            // AuditableEntity ise soft delete (mantıksal silme) yapar (isDeleted=true)
             trackable.Deleted(_currentUser.UserName);
             await Task.Run(() => Set.Update(entity), cancellationToken);
         }
         else
         {
-            await Task.Run(() => Set.Remove(entity), cancellationToken);
+            // AuditableEntity değilse hard delete (fiziksel silme) yapar
+            await Task.Run(() => Set.Remove(entity), cancellationToken); 
         }
     }
 

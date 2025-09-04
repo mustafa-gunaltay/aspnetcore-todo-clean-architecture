@@ -37,9 +37,9 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
             // Return success with the new category's ID
             return Result<int>.Success(category.Id, "Category created successfully");
         }
-        catch (DomainException)
+        catch (DomainException ex)
         {
-            return Result<int>.Failure($"Category with name '{request.Name}' already exists");
+            return Result<int>.Failure($"Failed to create category: {ex.Message}");
         }
         catch (Exception ex)
         {

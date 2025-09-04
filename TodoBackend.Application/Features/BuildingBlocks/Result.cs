@@ -9,8 +9,6 @@ using TodoBackend.Domain.Models;
 
 namespace TodoBackend.Application.Features.BuildingBlocks;
 
-
-
 // 1. Generic Result Class
 public class Result<T> : Result
 {
@@ -39,10 +37,22 @@ public class Result<T> : Result
 
     public static new Result<T> Failure(string message)
     {
-        return new Result<T> { IsSuccess = false };
+        var result = new Result<T> { IsSuccess = false };
+        if (!string.IsNullOrEmpty(message))
+            result.AddErrorMessage(message);
+        return result;
+    }
+
+    // ✅ Validation failure için generic method
+    public static new Result<T> ValidationFailure(Dictionary<string, string[]> validationErrors, string? message = null)
+    {
+        var result = new Result<T> { IsSuccess = false };
+        result.AddValidationErrorMessages(validationErrors);
+        if (!string.IsNullOrEmpty(message))
+            result.AddErrorMessage(message);
+        return result;
     }
 }
-
 
 // 2. Base Result Class
 public class Result
@@ -89,6 +99,15 @@ public class Result
     public static Result ValidationFailure(Dictionary<string, string[]> validationErrors, string? message = null)
     {
         var result = new Result { IsSuccess = false };
+        result.AddValidationErrorMessages(validationErrors);
+        if (!string.IsNullOrEmpty(message))
+            result.AddErrorMessage(message);
+        return result;
+    }
+
+    public static Result<T> ValidationFailure<T>(Dictionary<string, string[]> validationErrors, string? message = null)
+    {
+        var result = new Result<T> { IsSuccess = false };
         result.AddValidationErrorMessages(validationErrors);
         if (!string.IsNullOrEmpty(message))
             result.AddErrorMessage(message);

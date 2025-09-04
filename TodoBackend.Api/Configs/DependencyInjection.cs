@@ -10,6 +10,7 @@ using TodoBackend.Domain.Models;
 using TodoBackend.Infrastructure;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
 using TodoBackend.Infrastructure.Repositories;
+using TodoBackend.Application.Features.BuildingBlocks.Behaviors;
 
 namespace TodoBackend.Api.Configs;
 
@@ -21,7 +22,7 @@ public static class DependencyInjection
             .RegisterDbContext(configuration)
             .RegisterRepositories()
             .RegisterMediatR()
-            //.RegisterValidators()
+            .RegisterValidators()
             .RegisterCurrentUser()
             .RegisterSwagger();
 
@@ -56,7 +57,19 @@ public static class DependencyInjection
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining<CreateCategoryCommandHandler>();
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
         });
+        return services;
+    }
+
+    private static IServiceCollection RegisterValidators(this IServiceCollection services)
+    {
+        // NOT: Her yeni validator sinifi yazdigimizda ayri ayri buraya eklememize gerek yok
+        // Tek Kural: Validator'ınız Application katmanında olsun ve AbstractValidator<T> türünden türesin.
+
+        // FluentValidation.DependencyInjectionExtensions paketi extension method'unu Microsoft.Extensions.DependencyInjection namespace'ine ekler
+        services.AddValidatorsFromAssembly(typeof(CreateCategoryCommandValidator).Assembly);
+        
         return services;
     }
 
@@ -67,13 +80,6 @@ public static class DependencyInjection
 
         return services;
     }
-
-    //private static IServiceCollection RegisterValidators(this IServiceCollection services)
-    //{
-    //    // Application katmanındaki validator'ları bulmak için
-    //    services.AddValidatorsFromAssembly(typeof(CreateCategoryCommandValidator).Assembly);
-    //    return services;
-    //}
 
     private static IServiceCollection RegisterSwagger(this IServiceCollection services)
     {
