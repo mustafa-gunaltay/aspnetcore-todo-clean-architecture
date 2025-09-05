@@ -17,6 +17,11 @@ public class TaskItemRepository : Repository<TaskItem>, ITaskItemRepository
     {
     }
 
+    public Task<bool> DeleteUserFromTaskAsync(int taskItemId, string deletedBy, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<IReadOnlyList<TaskItem>> GetFilteredAsync(int userId, bool? isCompleted = null, Priority? priority = null, DateTime? startDate = null, DateTime? endDate = null, int? categoryId = null, CancellationToken ct = default)
     {
         throw new NotImplementedException();

@@ -26,7 +26,7 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
         throw new NotImplementedException();
     }
 
-    public Task<IReadOnlyList<TaskItemCategory>> GetByCategoryIdAsync(int categoryId, CancellationToken ct = default)
+    public Task<IReadOnlyList<TaskItemCategory>> GetTaskItemsByCategoryIdAsync(int categoryId, CancellationToken ct = default)
     {
         throw new NotImplementedException();
     }
@@ -36,7 +36,7 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
         throw new NotImplementedException();
     }
 
-    public Task<IReadOnlyList<TaskItemCategory>> GetByTaskItemIdAsync(int taskItemId, CancellationToken ct = default)
+    public Task<IReadOnlyList<TaskItemCategory>> GetCategoriesByTaskItemIdAsync(int taskItemId, CancellationToken ct = default)
     {
         throw new NotImplementedException();
     }

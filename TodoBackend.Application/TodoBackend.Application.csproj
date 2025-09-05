@@ -13,7 +13,6 @@
   <ItemGroup>
     <Folder Include="Features\Authentication\" />
     <Folder Include="Features\TodoTaskItem\" />
-    <Folder Include="Features\TodoUser\" />
   </ItemGroup>
 
   <ItemGroup>

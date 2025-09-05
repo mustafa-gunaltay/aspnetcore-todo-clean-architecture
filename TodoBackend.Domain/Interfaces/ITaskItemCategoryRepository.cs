@@ -10,10 +10,10 @@ namespace TodoBackend.Domain.Interfaces;
 public interface ITaskItemCategoryRepository : BuildingBlocks.IRepository<TaskItemCategory>
 {
     // TaskItem'a bağlı kategorileri getir
-    Task<IReadOnlyList<TaskItemCategory>> GetByTaskItemIdAsync(int taskItemId, CancellationToken ct = default);
+    Task<IReadOnlyList<TaskItemCategory>> GetCategoriesByTaskItemIdAsync(int taskItemId, CancellationToken ct = default);
 
     // Category'ye bağlı task'ları getir
-    Task<IReadOnlyList<TaskItemCategory>> GetByCategoryIdAsync(int categoryId, CancellationToken ct = default);
+    Task<IReadOnlyList<TaskItemCategory>> GetTaskItemsByCategoryIdAsync(int categoryId, CancellationToken ct = default);
 
     // Belirli bir ilişki var mı kontrolü
     Task<TaskItemCategory?> GetByTaskAndCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default);

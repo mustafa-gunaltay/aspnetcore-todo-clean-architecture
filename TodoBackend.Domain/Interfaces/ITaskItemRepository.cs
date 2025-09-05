@@ -13,7 +13,7 @@ public interface ITaskItemRepository : BuildingBlocks.IRepository<TaskItem>
     // User'a göre filtreleme (temel gereksinim)
     Task<IReadOnlyList<TaskItem>> GetTasksByUserIdAsync(int userId, CancellationToken ct = default);
 
-    // Filtreleme ve sayfalama (gereksinimlerden)
+    // Filtreleme (gereksinimlerden)
     Task<IReadOnlyList<TaskItem>> GetFilteredAsync(
         int userId,
         bool? isCompleted = null,
@@ -27,4 +27,7 @@ public interface ITaskItemRepository : BuildingBlocks.IRepository<TaskItem>
     // High priority görevler için DueDate kontrolü
     Task<IReadOnlyList<TaskItem>> GetOverdueTasksAsync(int userId, CancellationToken ct = default);
     Task<IReadOnlyList<TaskItem>> GetUpcomingTasksAsync(int userId, int days = 7, CancellationToken ct = default);
+
+    // YENİ: User ile TaskItem arasındaki ilişkiyi kesme (User'in bir TaskItem'i (gorevi) yapmaktan vazgecince silebilmesi icin)
+    Task<bool> DeleteUserFromTaskAsync(int taskItemId, string deletedBy, CancellationToken ct = default);
 }

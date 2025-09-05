@@ -18,7 +18,7 @@ public class TaskItem : BuildingBlocks.AuditableEntity
     public DateTime? DueDate { get; private set; } // Nullable
     public DateTime? CompletedAt { get; private set; } // Nullable
     public bool IsCompleted { get; private set; } = false; // NOT NULL, default false
-    public int UserId { get; private set; } // NOT NULL, FK
+    public int? UserId { get; private set; } // Nullable, FK
 
     // Navigation properties
     public User? User { get; set; }
@@ -122,4 +122,25 @@ public class TaskItem : BuildingBlocks.AuditableEntity
             existingRelation.SoftDelete();
         }
     }
+
+    // Yeni method: Task'ın User ile ilisigini kes ve soft-delete et
+    // UserId null yapildiginda TaskItem'in da sistemde olmasinin bir anlami kalmiyor dolayisiyla UserId=null ile birlikte TaskItem soft delete yapiliyor
+    public void SoftDeleteWithUser(string deletedBy)
+    {
+        SoftDelete(); // Base class'tan
+        Deleted(deletedBy); // Audit için
+        UserId = null; // User referansını kaldır
+    }
+
+    // Task restore edildiğinde UserId'nin tekrar atanması gerekir
+    public void RestoreWithUser(int userId)
+    {
+        if (userId <= 0)
+            throw new DomainException("Valid UserId is required for restore.");
+
+        Restore(); // Base class'tan
+        UserId = userId;
+    }
+
+    
 }
