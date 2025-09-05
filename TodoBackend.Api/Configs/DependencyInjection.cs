@@ -11,6 +11,7 @@ using TodoBackend.Infrastructure;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
 using TodoBackend.Infrastructure.Repositories;
 using TodoBackend.Application.Features.BuildingBlocks.Behaviors;
+using Microsoft.OpenApi.Models;
 
 namespace TodoBackend.Api.Configs;
 
@@ -83,7 +84,24 @@ public static class DependencyInjection
 
     private static IServiceCollection RegisterSwagger(this IServiceCollection services)
     {
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "TodoBackend API",
+                Version = "v1",
+                Description = "A Todo application API built with Clean Architecture",
+                Contact = new OpenApiContact
+                {
+                    Name = "TodoBackend Team",
+                    Email = "info@todobackend.com"
+                }
+            });
+
+            // Enable annotations for Swagger
+            c.EnableAnnotations();
+        });
+        
         return services;
     }
 }

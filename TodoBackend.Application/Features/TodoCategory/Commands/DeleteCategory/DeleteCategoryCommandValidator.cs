@@ -6,6 +6,8 @@ public class DeleteCategoryCommandValidator : AbstractValidator<DeleteCategoryCo
 {
     public DeleteCategoryCommandValidator()
     {
-        
+        // CategoryId zorunlu ve pozitif olmal?
+        RuleFor(v => v.CategoryId)
+            .GreaterThan(0).WithMessage("CategoryId must be greater than 0");
     }
 }
