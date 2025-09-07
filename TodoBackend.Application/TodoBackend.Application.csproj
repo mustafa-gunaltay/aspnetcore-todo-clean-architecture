@@ -12,10 +12,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Authentication\" />
-    <Folder Include="Features\TodoTaskItem\Commands\CompleteTaskItem\" />
-    <Folder Include="Features\TodoTaskItem\Commands\AssignTaskItemToCategory\" />
-    <Folder Include="Features\TodoTaskItem\Commands\RemoveTaskItemFromCategory\" />
-    <Folder Include="Features\TodoTaskItem\Commands\ReopenTaskItem\" />
     <Folder Include="Features\TodoTaskItem\Queries\GetTaskItemsByUser\" />
     <Folder Include="Features\TodoTaskItem\Queries\GetFilteredTaskItems\" />
     <Folder Include="Features\TodoTaskItem\Queries\GetOverdueTaskItems\" />

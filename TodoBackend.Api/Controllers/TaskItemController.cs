@@ -1,8 +1,12 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TodoBackend.Application.Features.TodoTaskItem.Commands.CreateTaskItem;
 using TodoBackend.Application.Features.TodoTaskItem.Commands.UpdateTaskItem;
 using TodoBackend.Application.Features.TodoTaskItem.Commands.DeleteTaskItem;
+using TodoBackend.Application.Features.TodoTaskItem.Commands.AssignTaskItemToCategory;
+using TodoBackend.Application.Features.TodoTaskItem.Commands.RemoveTaskItemFromCategory;
+using TodoBackend.Application.Features.TodoTaskItem.Commands.CompleteTaskItem;
+using TodoBackend.Application.Features.TodoTaskItem.Commands.ReopenTaskItem;
 using TodoBackend.Application.Features.BuildingBlocks;
 
 namespace TodoBackend.Api.Controllers;
@@ -28,15 +32,15 @@ public class TaskItemController : ControllerBase
         var result = await _mediator.Send(request, cancellationToken);
         if (result.IsSuccess)
         {
-            // 201 Created - Yeni kaynak olu?turuldu, Location header ile kaynak URI'sini ver
+            // 201 Created - Yeni kaynak oluşturuldu, Location header ile kaynak URI'sini ver
             return Created($"/api/taskitem/{result.Value}", result);
         }
         
-        // Validation errors i�in 400 Bad Request
+        // Validation errors için 400 Bad Request
         if (result.HasValidationErrors)
             return BadRequest(result);
             
-        // Business rule violations i�in 400 Bad Request (�rn: user not found, high priority without due date)
+        // Business rule violations için 400 Bad Request (örn: user not found, high priority without due date)
         return BadRequest(result);
     }
 
@@ -53,19 +57,19 @@ public class TaskItemController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
         if (result.IsSuccess)
         {
-            // 200 OK - G�ncelleme ba?ar?l?, success message ile birlikte
+            // 200 OK - Güncelleme başarılı, success message ile birlikte
             return Ok(result);
         }
         
-        // Validation errors i�in 400 Bad Request
+        // Validation errors için 400 Bad Request
         if (result.HasValidationErrors)
             return BadRequest(result);
             
-        // Task not found i�in 404 Not Found
+        // Task not found için 404 Not Found
         if (result.Errors.Any(e => e.Contains("not found")))
             return NotFound(result);
             
-        // Business rule violations i�in 400 Bad Request
+        // Business rule violations için 400 Bad Request
         return BadRequest(result);
     }
 
@@ -79,19 +83,123 @@ public class TaskItemController : ControllerBase
         var result = await _mediator.Send(new DeleteTaskItemCommand(id), cancellationToken);
         if (result.IsSuccess)
         {
-            // 200 OK - Silme ba?ar?l?, success message ile birlikte
+            // 200 OK - Silme başarılı, success message ile birlikte
             return Ok(result);
         }
         
-        // Validation errors i�in 400 Bad Request
+        // Validation errors için 400 Bad Request
         if (result.HasValidationErrors)
             return BadRequest(result);
             
-        // Task not found i�in 404 Not Found
+        // Task not found için 404 Not Found
         if (result.Errors.Any(e => e.Contains("not found")))
             return NotFound(result);
             
-        // Di?er hatalar i�in 400 Bad Request
+        // Diğer hatalar için 400 Bad Request
+        return BadRequest(result);
+    }
+
+    [HttpPost("assign-category")]
+    //[SwaggerOperation("Assign Task to Category")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Task assigned to category successfully", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "Task or Category not found", typeof(Result))]
+    public async Task<IActionResult> AssignToCategory([FromBody] AssignTaskItemToCategoryCommand request, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(request, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Assignment başarılı
+            return Ok(result);
+        }
+        
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+            
+        // Task or Category not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+            
+        // Business rule violations için 400 Bad Request
+        return BadRequest(result);
+    }
+
+    [HttpDelete("remove-category")]
+    //[SwaggerOperation("Remove Task from Category")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Task removed from category successfully", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "Task or Category not found", typeof(Result))]
+    public async Task<IActionResult> RemoveFromCategory([FromBody] RemoveTaskItemFromCategoryCommand request, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(request, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Removal başarılı
+            return Ok(result);
+        }
+        
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+            
+        // Task or Category not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+            
+        // Business rule violations için 400 Bad Request
+        return BadRequest(result);
+    }
+
+    [HttpPost("complete")]
+    //[SwaggerOperation("Complete Task")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Task completed successfully", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "Task not found", typeof(Result))]
+    public async Task<IActionResult> Complete([FromBody] CompleteTaskItemCommand request, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(request, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Complete işlemi başarılı
+            return Ok(result);
+        }
+        
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+            
+        // Task not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+            
+        // Business rule violations için 400 Bad Request (örn: already completed, past due date)
+        return BadRequest(result);
+    }
+
+    [HttpPost("reopen")]
+    //[SwaggerOperation("Reopen Task")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Task reopened successfully", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "Task not found", typeof(Result))]
+    public async Task<IActionResult> Reopen([FromBody] ReopenTaskItemCommand request, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(request, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Reopen işlemi başarılı
+            return Ok(result);
+        }
+        
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+            
+        // Task not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+            
+        // Business rule violations için 400 Bad Request (örn: not completed, cannot reopen)
         return BadRequest(result);
     }
 }

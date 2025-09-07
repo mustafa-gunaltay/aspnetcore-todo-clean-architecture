@@ -26,6 +26,8 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<
                 return Result<UserViewModel>.Failure("User not found");
             }
 
+            var usersBySpecifiedId = await _uow.TaskItemRepository.GetTasksByUserIdAsync(user.Id, cancellationToken);
+            var taskCount = usersBySpecifiedId.Count;
             // Map to ViewModel
             var userViewModel = new UserViewModel
             {
@@ -33,7 +35,8 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, Result<
                 Email = user.Email,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
-                TaskCount = user.TaskItems?.Count(t => !t.IsDeleted) ?? 0
+                //TaskCount = user.TaskItems?.Count(t => !t.IsDeleted) ?? 0
+                TaskCount = taskCount
             };
 
             return Result<UserViewModel>.Success(userViewModel, "User retrieved successfully");

@@ -24,22 +24,12 @@ public class DeleteTaskItemCommandHandler : IRequestHandler<DeleteTaskItemComman
             {
                 return Result.Failure("Task not found");
             }
-
-            // Gereksinim 5: Kullan?c? kendisine ait görevleri silebilmelidir
-            // TaskItem üstünde UserId null i?aretlendi?inde TaskItem'in varl???n?n bir anlam? kalmaz 
-            // dolay?s?yla soft delete i?lemi de birlikte yap?l?r
             
-            // ?lk olarak task-category ili?kilerini de soft delete et
+            // Ilk olarak task-category ili?kilerini de soft delete et
             await _uow.TaskItemCategoryRepository.DeleteAllByTaskItemIdAsync(request.TaskItemId, cancellationToken);
 
-            // TaskItem'? user ile ili?kisini keserek soft delete et
-            var deleteResult = await _uow.TaskItemRepository.DeleteUserFromTaskAsync(request.TaskItemId, cancellationToken);
+            await _uow.TaskItemRepository.DeleteAsync(taskItem, cancellationToken);
             
-            if (!deleteResult)
-            {
-                return Result.Failure("Failed to delete task or task is already deleted");
-            }
-
             // Save all changes in one transaction
             await _uow.SaveChangesAsync(cancellationToken);
 

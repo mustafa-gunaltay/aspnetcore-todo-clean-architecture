@@ -22,7 +22,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(256); // NVARCHAR(256) - DB semasina uygun
-            
+
 
         builder.Property(u => u.Password)
             .IsRequired()
