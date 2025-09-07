@@ -22,83 +22,62 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
 
         builder.Property(t => t.Title)
             .IsRequired()
-            .HasMaxLength(200) // NVARCHAR(200)
-            .HasColumnType("NVARCHAR(200)")
-            .HasColumnName("Title");
+            .HasMaxLength(200);
 
         builder.Property(t => t.Description)
-            .HasColumnType("NVARCHAR(MAX)") // NVARCHAR(MAX) - DB ?emas?na uygun
-            .IsRequired(false)
-            .HasColumnName("Description"); // [Description] - reserved word
+            .IsRequired(false);
 
         builder.Property(t => t.Priority)
-            .IsRequired()
-            .HasColumnType("TINYINT") // TINYINT - DB ?emas?na uygun
-            .HasConversion<byte>()
-            .HasColumnName("Priority"); // [Priority] - reserved word
+            .IsRequired();
 
         builder.Property(t => t.DueDate)
-            .IsRequired(false)
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired(false);
 
         builder.Property(t => t.CompletedAt)
-            .IsRequired(false)
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired(false);
 
         builder.Property(t => t.IsCompleted)
-            .IsRequired()
-            .HasDefaultValue(false)
-            .HasColumnType("BIT");
+            .IsRequired();
 
         builder.Property(t => t.UserId)
-            .IsRequired(false); // NULL - User silinebilir
+            .IsRequired(false);
 
         // Audit fields - DB ?emas?na uygun
         builder.Property(t => t.CreatedAt)
-            .IsRequired()
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired();
 
         builder.Property(t => t.CreatedBy)
             .IsRequired()
-            .HasMaxLength(100)
-            .HasColumnType("NVARCHAR(100)");
+            .HasMaxLength(100);
 
         builder.Property(t => t.UpdatedAt)
-            .IsRequired(false)
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired(false);
 
         builder.Property(t => t.UpdatedBy)
             .HasMaxLength(100)
-            .IsRequired(false)
-            .HasColumnType("NVARCHAR(100)");
+            .IsRequired(false);
 
         builder.Property(t => t.IsDeleted)
             .IsRequired()
-            .HasDefaultValue(false) // CONSTRAINT DF_TaskItem_IsDeleted DEFAULT (0)
-            .HasColumnType("BIT");
+            .HasDefaultValue(false);
 
         builder.Property(t => t.DeletedAt)
-            .IsRequired(false)
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired(false);
 
         builder.Property(t => t.DeletedBy)
             .HasMaxLength(100)
-            .IsRequired(false)
-            .HasColumnType("NVARCHAR(100)");
+            .IsRequired(false);
 
         // Relationships
         builder
             .HasOne(t => t.User)
             .WithMany(u => u.TaskItems)
-            .HasForeignKey(t => t.UserId)
-            .OnDelete(DeleteBehavior.NoAction) // ON DELETE NO ACTION
-            .HasConstraintName("FK_TaskItem_User");
+            .HasForeignKey(t => t.UserId);
 
         builder
             .HasMany(t => t.TaskItemCategories)
             .WithOne(tc => tc.TaskItem)
-            .HasForeignKey(tc => tc.TaskItemId)
-            .OnDelete(DeleteBehavior.NoAction); // Defensive programming
+            .HasForeignKey(tc => tc.TaskItemId);
 
         // Soft delete için global query filter
         builder.HasQueryFilter(t => !t.IsDeleted);

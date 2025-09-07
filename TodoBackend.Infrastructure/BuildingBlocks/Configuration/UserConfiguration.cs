@@ -21,59 +21,48 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.Email)
             .IsRequired()
-            .HasMaxLength(256) // NVARCHAR(256) - DB ?emas?na uygun
-            .HasColumnType("NVARCHAR(256)");
+            .HasMaxLength(256); // NVARCHAR(256) - DB semasina uygun
+            
 
         builder.Property(u => u.Password)
             .IsRequired()
-            .HasMaxLength(200) // NVARCHAR(200) - DB ?emas?na uygun
-            .HasColumnType("NVARCHAR(200)")
-            .HasColumnName("Password"); // [Password] - reserved word
+            .HasMaxLength(200);
 
-        // Audit fields - DB ?emas?na uygun
+        // Audit fields - DB semasina uygun
         builder.Property(u => u.CreatedAt)
-            .IsRequired()
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired();
 
         builder.Property(u => u.CreatedBy)
             .IsRequired()
-            .HasMaxLength(100)
-            .HasColumnType("NVARCHAR(100)");
+            .HasMaxLength(100);
 
         builder.Property(u => u.UpdatedAt)
-            .IsRequired(false)
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired(false);
 
         builder.Property(u => u.UpdatedBy)
             .HasMaxLength(100)
-            .IsRequired(false)
-            .HasColumnType("NVARCHAR(100)");
+            .IsRequired(false);
 
         builder.Property(u => u.IsDeleted)
             .IsRequired()
-            .HasDefaultValue(false) // CONSTRAINT DF_User_IsDeleted DEFAULT (0)
-            .HasColumnType("BIT");
+            .HasDefaultValue(false);
 
         builder.Property(u => u.DeletedAt)
-            .IsRequired(false)
-            .HasColumnType("DATETIME2(0)");
+            .IsRequired(false);
 
         builder.Property(u => u.DeletedBy)
             .HasMaxLength(100)
-            .IsRequired(false)
-            .HasColumnType("NVARCHAR(100)");
+            .IsRequired(false);
 
-        // Unique constraint for Email - UQ_User_Email
+        // Unique constraint for Email
         builder.HasIndex(u => u.Email)
-            .IsUnique()
-            .HasDatabaseName("UQ_User_Email");
+            .IsUnique();
 
         // Navigation: One-to-many with TaskItem
         builder
             .HasMany(u => u.TaskItems)
             .WithOne(t => t.User)
-            .HasForeignKey(t => t.UserId)
-            .OnDelete(DeleteBehavior.NoAction); // ON DELETE NO ACTION
+            .HasForeignKey(t => t.UserId);
 
         // Soft delete için global query filter
         builder.HasQueryFilter(u => !u.IsDeleted);
