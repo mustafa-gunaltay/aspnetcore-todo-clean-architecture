@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TodoBackend.Domain.Interfaces;
 using TodoBackend.Domain.Models;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
@@ -16,33 +17,106 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
     {
     }
 
-    public Task DeleteAllByCategoryIdAsync(int categoryId, CancellationToken ct = default)
+    // YENİ: Gereksinim 8 - Görevler kategorilere bağlanabilmelidir
+    public async Task<bool> AssignTaskToCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        // Zaten atanmış mı kontrol et
+        var existingRelation = await GetByTaskAndCategoryAsync(taskItemId, categoryId, ct);
+        if (existingRelation != null && !existingRelation.IsDeleted)
+            return false; // Zaten atanmış
+
+        // Soft deleted relation varsa restore et
+        if (existingRelation != null && existingRelation.IsDeleted)
+        {
+            existingRelation.Restore();
+            await UpdateAsync(existingRelation, ct);
+            return true;
+        }
+
+        // Yeni relation oluştur
+        var newRelation = new TaskItemCategory(taskItemId, categoryId);
+        await AddAsync(newRelation, ct);
+        return true;
     }
 
-    public Task DeleteAllByTaskItemIdAsync(int taskItemId, CancellationToken ct = default)
+    // YENİ: Gereksinim 9 - Görevler kategorilerden ayrılabilmelidir
+    public async Task<bool> RemoveTaskFromCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        var relation = await GetByTaskAndCategoryAsync(taskItemId, categoryId, ct);
+        if (relation == null || relation.IsDeleted)
+            return false;
+
+        // Soft delete
+        await DeleteAsync(relation, ct);
+        return true;
     }
 
-    public Task<IReadOnlyList<TaskItemCategory>> GetTaskItemsByCategoryIdAsync(int categoryId, CancellationToken ct = default)
+    public async Task<bool> IsTaskAssignedToCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        var relation = await GetByTaskAndCategoryAsync(taskItemId, categoryId, ct);
+        return relation != null && !relation.IsDeleted;
     }
 
-    public Task<TaskItemCategory?> GetByTaskAndCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TaskItemCategory>> GetActiveRelationsByTaskIdAsync(int taskItemId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        return await Set.AsNoTracking()
+            .Where(tc => tc.TaskItemId == taskItemId && !tc.IsDeleted)
+            .Include(tc => tc.Category)
+            .ToListAsync(ct);
     }
 
-    public Task<IReadOnlyList<TaskItemCategory>> GetCategoriesByTaskItemIdAsync(int taskItemId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TaskItemCategory>> GetCategoriesByTaskItemIdAsync(int taskItemId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        return await Set.AsNoTracking()
+            .Where(tc => tc.TaskItemId == taskItemId && !tc.IsDeleted)
+            .Include(tc => tc.Category)
+            .ToListAsync(ct);
     }
 
-    public Task<IReadOnlyList<TaskItemCategory>> GetByTaskItemIdsAsync(IEnumerable<int> taskItemIds, CancellationToken ct = default)
+    public async Task<IReadOnlyList<TaskItemCategory>> GetTaskItemsByCategoryIdAsync(int categoryId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        return await Set.AsNoTracking()
+            .Where(tc => tc.CategoryId == categoryId && !tc.IsDeleted)
+            .Include(tc => tc.TaskItem)
+            .ToListAsync(ct);
+    }
+
+    public async Task<TaskItemCategory?> GetByTaskAndCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default)
+    {
+        return await Set.AsNoTracking()
+            .FirstOrDefaultAsync(tc => tc.TaskItemId == taskItemId && tc.CategoryId == categoryId, ct);
+    }
+
+    public async Task<IReadOnlyList<TaskItemCategory>> GetByTaskItemIdsAsync(IEnumerable<int> taskItemIds, CancellationToken ct = default)
+    {
+        return await Set.AsNoTracking()
+            .Where(tc => taskItemIds.Contains(tc.TaskItemId) && !tc.IsDeleted)
+            .Include(tc => tc.Category)
+            .Include(tc => tc.TaskItem)
+            .ToListAsync(ct);
+    }
+
+    public async Task DeleteAllByTaskItemIdAsync(int taskItemId, CancellationToken ct = default)
+    {
+        var relations = await Set
+            .Where(tc => tc.TaskItemId == taskItemId && !tc.IsDeleted)
+            .ToListAsync(ct);
+
+        foreach (var relation in relations)
+        {
+            await DeleteAsync(relation, ct);
+        }
+    }
+
+    public async Task DeleteAllByCategoryIdAsync(int categoryId, CancellationToken ct = default)
+    {
+        var relations = await Set
+            .Where(tc => tc.CategoryId == categoryId && !tc.IsDeleted)
+            .ToListAsync(ct);
+
+        foreach (var relation in relations)
+        {
+            await DeleteAsync(relation, ct);
+        }
     }
 }

@@ -29,5 +29,8 @@ public interface ITaskItemRepository : BuildingBlocks.IRepository<TaskItem>
     Task<IReadOnlyList<TaskItem>> GetUpcomingTasksAsync(int userId, int days = 7, CancellationToken ct = default);
 
     // YENİ: User ile TaskItem arasındaki ilişkiyi kesme (User'in bir TaskItem'i (gorevi) yapmaktan vazgecince silebilmesi icin)
-    Task<bool> DeleteUserFromTaskAsync(int taskItemId, string deletedBy, CancellationToken ct = default);
+    Task<bool> DeleteUserFromTaskAsync(int taskItemId, CancellationToken ct = default);
+    
+    // YENİ: User silindiğinde o user'ın tüm task'larını soft delete et
+    Task<int> SoftDeleteAllTasksByUserIdAsync(int userId, CancellationToken ct = default);
 }

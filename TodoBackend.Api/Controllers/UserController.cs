@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using TodoBackend.Application.Features.TodoUser.Commands.CreateUser;
 using TodoBackend.Application.Features.TodoUser.Commands.UpdateUser;
@@ -114,14 +115,14 @@ public class UserController : ControllerBase
     //[SwaggerResponse(StatusCodes.Status204NoContent, "Deleted successfully")]
     //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result))]
     //[SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(Result))]
-    //[SwaggerResponse(StatusCodes.Status409Conflict, "Cannot delete user with active tasks", typeof(Result))]
+    //[SwaggerResponse(StatusCodes.Status200OK, "User and associated tasks deleted successfully", typeof(Result))]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteUserCommand(id), cancellationToken);
         if (result.IsSuccess)
         {
-            // 204 No Content - Silme başarılı (soft delete), dönecek gövde yok
-            return NoContent();
+            // 200 OK - Silme başarılı, kaç task silindiğini de göstermek için OK kullandık
+            return Ok(result);
         }
         
         // Validation errors için 400 Bad Request
@@ -132,8 +133,8 @@ public class UserController : ControllerBase
         if (result.Errors.Any(e => e.Contains("not found")))
             return NotFound(result);
             
-        // Business rule violations (örn: active tasks var) için 409 Conflict
-        return Conflict(result);
+        // Diğer hatalar için 400 Bad Request
+        return BadRequest(result);
     }
 
     [HttpPost("validate-credentials")]

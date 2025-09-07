@@ -26,4 +26,15 @@ public interface ITaskItemCategoryRepository : BuildingBlocks.IRepository<TaskIt
 
     // Bir kategorinin tüm task ilişkilerini soft delete
     Task DeleteAllByCategoryIdAsync(int categoryId, CancellationToken ct = default);
+
+    // YENİ: Gereksinim 8-9 için eklenenler
+    // 8. Görevler kategorilere bağlanabilmelidir
+    Task<bool> AssignTaskToCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default);
+    
+    // 9. Görevler kategorilerden ayrılabilmelidir  
+    Task<bool> RemoveTaskFromCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default);
+
+    // Yardımcı metodlar
+    Task<bool> IsTaskAssignedToCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default);
+    Task<IReadOnlyList<TaskItemCategory>> GetActiveRelationsByTaskIdAsync(int taskItemId, CancellationToken ct = default);
 }

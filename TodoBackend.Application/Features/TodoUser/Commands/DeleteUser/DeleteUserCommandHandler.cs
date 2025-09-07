@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Domain.DomainExceptions;
 using TodoBackend.Domain.Interfaces;
@@ -25,18 +25,19 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
                 return Result.Failure("User not found");
             }
 
-            // Check if user has active tasks
-            var userTasks = await _uow.TaskItemRepository.GetTasksByUserIdAsync(request.UserId, cancellationToken);
-            if (userTasks.Any(t => !t.IsDeleted))
-            {
-                return Result.Failure("Cannot delete user with active tasks. Please delete or reassign tasks first.");
-            }
+            // YENİ GEREKSINIM: User silindiğinde o user'ın task'ları da soft delete edilmeli
+            // Bulk operation ile performance optimizasyonu
+            var deletedTaskCount = await _uow.TaskItemRepository.SoftDeleteAllTasksByUserIdAsync(
+                request.UserId, 
+                cancellationToken);
 
             // Soft delete user
             await _uow.UserRepository.DeleteAsync(user, cancellationToken);
+            
+            // Save all changes in one transaction
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return Result.Success("User deleted successfully");
+            return Result.Success($"User and {deletedTaskCount} associated tasks deleted successfully");
         }
         catch (DomainException dex)
         {
