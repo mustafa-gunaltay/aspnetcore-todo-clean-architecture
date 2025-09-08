@@ -7,7 +7,12 @@ using TodoBackend.Application.Features.TodoTaskItem.Commands.AssignTaskItemToCat
 using TodoBackend.Application.Features.TodoTaskItem.Commands.RemoveTaskItemFromCategory;
 using TodoBackend.Application.Features.TodoTaskItem.Commands.CompleteTaskItem;
 using TodoBackend.Application.Features.TodoTaskItem.Commands.ReopenTaskItem;
+using TodoBackend.Application.Features.TodoTaskItem.Queries.GetFilteredTaskItems;
+using TodoBackend.Application.Features.TodoTaskItem.Queries.GetOverdueTaskItems;
+using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByUserId;
+using TodoBackend.Application.Features.TodoTaskItem.Queries.GetUpcomingTaskItems;
 using TodoBackend.Application.Features.BuildingBlocks;
+using TodoBackend.Domain.Enums;
 
 namespace TodoBackend.Api.Controllers;
 
@@ -20,6 +25,62 @@ public class TaskItemController : ControllerBase
     public TaskItemController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet("filtered-tasks")]
+    //[SwaggerOperation("Get Filtered Task Items")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Tasks retrieved successfully", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    public async Task<IActionResult> GetFilteredTasks(
+        [FromQuery] GetFilteredTaskItemsQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // User not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
+    }
+
+    [HttpGet("overdue-tasks")]
+    //[SwaggerOperation("Get Overdue Task Items")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Overdue tasks retrieved successfully", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    public async Task<IActionResult> GetOverdueTasks(
+        [FromQuery] GetOverdueTaskItemsQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // User not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
     }
 
     [HttpPost]
@@ -200,6 +261,62 @@ public class TaskItemController : ControllerBase
             return NotFound(result);
             
         // Business rule violations için 400 Bad Request (örn: not completed, cannot reopen)
+        return BadRequest(result);
+    }
+
+    [HttpGet("user-tasks")]
+    //[SwaggerOperation("Get Task Items by User Id")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "User tasks retrieved successfully", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    public async Task<IActionResult> GetTaskItemsByUserId(
+        [FromQuery] GetTaskItemsByUserIdQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // User not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
+    }
+
+    [HttpGet("upcoming-tasks")]
+    //[SwaggerOperation("Get Upcoming Task Items")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Upcoming tasks retrieved successfully", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    public async Task<IActionResult> GetUpcomingTasks(
+        [FromQuery] GetUpcomingTaskItemsQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // User not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
         return BadRequest(result);
     }
 }
