@@ -21,7 +21,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseAuthentication();  // JWT token do?rulamas?
+app.UseAuthorization();   // Yetkilendirme kontrolü
 
 app.MapControllers();
 

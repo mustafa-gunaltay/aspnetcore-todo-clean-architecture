@@ -1,17 +1,19 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Application.Features.TodoCategory.Commands.CreateCategory;
-using TodoBackend.Application.Features.TodoCategory.Commands.UpdateCategory;
 using TodoBackend.Application.Features.TodoCategory.Commands.DeleteCategory;
+using TodoBackend.Application.Features.TodoCategory.Commands.UpdateCategory;
 using TodoBackend.Application.Features.TodoCategory.Queries.GetAllCategories;
 using TodoBackend.Application.Features.TodoCategory.Queries.GetCategoryById;
-using TodoBackend.Application.Features.BuildingBlocks;
 
 namespace TodoBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]  // YENİ: Bu controller'a erişmek için JWT token gerekli
 public class CategoryController : ControllerBase
 {
     private readonly IMediator _mediator;
