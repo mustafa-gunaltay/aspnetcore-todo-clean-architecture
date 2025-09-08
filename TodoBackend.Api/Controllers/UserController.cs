@@ -1,18 +1,20 @@
 ﻿using MediatR;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Application.Features.TodoUser.Commands.CreateUser;
-using TodoBackend.Application.Features.TodoUser.Commands.UpdateUser;
 using TodoBackend.Application.Features.TodoUser.Commands.DeleteUser;
+using TodoBackend.Application.Features.TodoUser.Commands.UpdateUser;
 using TodoBackend.Application.Features.TodoUser.Queries.GetAllUsers;
 using TodoBackend.Application.Features.TodoUser.Queries.GetUserById;
 using TodoBackend.Application.Features.TodoUser.Queries.ValidateUserCredentials;
-using TodoBackend.Application.Features.BuildingBlocks;
 
 namespace TodoBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]  // Bu controller'a erişmek için JWT token gerekli
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -23,6 +25,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]  // Kullanıcı kaydı herkese açık
     //[SwaggerOperation("Create User")]
     //[SwaggerResponse(StatusCodes.Status201Created, "Created", typeof(Result<int>))]
     //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<int>))]
@@ -138,6 +141,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("validate-credentials")]
+    [AllowAnonymous]  // Credential validation herkese açık (login için)
     //[SwaggerOperation("Validate User Credentials")]
     //[SwaggerResponse(StatusCodes.Status200OK, "Validation completed", typeof(Result<bool>))]
     //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<bool>))]

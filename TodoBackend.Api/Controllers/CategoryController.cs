@@ -13,7 +13,7 @@ namespace TodoBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]  // YENİ: Bu controller'a erişmek için JWT token gerekli
+[Authorize]  // Bu controller'a erişmek için JWT token gerekli
 public class CategoryController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -19,6 +19,7 @@ namespace TodoBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]  // Bu controller'a erişmek için JWT token gerekli
 public class TaskItemController : ControllerBase
 {
     private readonly IMediator _mediator;
