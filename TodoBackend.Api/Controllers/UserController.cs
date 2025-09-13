@@ -25,7 +25,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]  // Kullanıcı kaydı herkese açık
+    [AllowAnonymous]  // Kullanıcı kaydı herkese açık (register icin)
     //[SwaggerOperation("Create User")]
     //[SwaggerResponse(StatusCodes.Status201Created, "Created", typeof(Result<int>))]
     //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<int>))]

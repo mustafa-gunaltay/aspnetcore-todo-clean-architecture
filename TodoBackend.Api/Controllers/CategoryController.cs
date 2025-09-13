@@ -8,6 +8,7 @@ using TodoBackend.Application.Features.TodoCategory.Commands.DeleteCategory;
 using TodoBackend.Application.Features.TodoCategory.Commands.UpdateCategory;
 using TodoBackend.Application.Features.TodoCategory.Queries.GetAllCategories;
 using TodoBackend.Application.Features.TodoCategory.Queries.GetCategoryById;
+using TodoBackend.Application.Features.TodoCategory.Queries.GetCategoriesByTaskItem;
 
 namespace TodoBackend.Api.Controllers;
 
@@ -136,5 +137,33 @@ public class CategoryController : ControllerBase
             
         // Business rule violations (örn: active tasks var) için 409 Conflict
         return Conflict(result);
+    }
+
+    [HttpGet("task/{taskItemId}")]
+    //[SwaggerOperation("Get Categories by Task Item")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Categories retrieved successfully", typeof(Result<IReadOnlyList<CategorySummaryViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<IReadOnlyList<CategorySummaryViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "Task item not found", typeof(Result<IReadOnlyList<CategorySummaryViewModel>>))]
+    public async Task<IActionResult> GetCategoriesByTaskItem(
+        int taskItemId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetCategoriesByTaskItemQuery(taskItemId), cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // Task item not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
     }
 }

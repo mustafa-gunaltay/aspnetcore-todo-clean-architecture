@@ -12,6 +12,7 @@ using TodoBackend.Application.Features.TodoTaskItem.Queries.GetFilteredTaskItems
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetOverdueTaskItems;
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByUserId;
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetUpcomingTaskItems;
+using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByCategory;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Domain.Enums;
 
@@ -315,6 +316,34 @@ public class TaskItemController : ControllerBase
             return BadRequest(result);
 
         // User not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
+    }
+
+    [HttpGet("category/{categoryId}")]
+    //[SwaggerOperation("Get Task Items by Category")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Task items retrieved successfully", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "Category not found", typeof(Result<IReadOnlyList<TaskItemViewModel>>))]
+    public async Task<IActionResult> GetTaskItemsByCategory(
+        int categoryId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetTaskItemsByCategoryQuery(categoryId), cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // Category not found için 404 Not Found
         if (result.Errors.Any(e => e.Contains("not found")))
             return NotFound(result);
 
