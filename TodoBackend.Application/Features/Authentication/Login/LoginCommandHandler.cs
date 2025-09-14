@@ -12,32 +12,30 @@ namespace TodoBackend.Application.Features.Authentication.Login;
 public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<string>>
 {
     private readonly ITodoBackendUnitOfWork _uow;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public LoginCommandHandler(ITodoBackendUnitOfWork uow)
+    public LoginCommandHandler(ITodoBackendUnitOfWork uow, IPasswordHasher passwordHasher)
     {
         _uow = uow;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<string>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            // 1. Email/password'ü veritaban?nda kontrol et
-            var isValidUser = await _uow.UserRepository.ValidateCredentialsAsync(
-                request.Email, 
-                request.Password, 
-                cancellationToken);
-
-            if (!isValidUser)
+            // 1. User'? email ile bul
+            var user = await _uow.UserRepository.GetByEmailAsync(request.Email, cancellationToken);
+            if (user == null)
             {
                 return Result<string>.Failure("Invalid email or password");
             }
 
-            // 2. User bilgilerini al
-            var user = await _uow.UserRepository.GetByEmailAsync(request.Email, cancellationToken);
-            if (user == null)
+            // 2. Password'u do?rula
+            var isPasswordValid = _passwordHasher.Verify(request.Password, user.PasswordHash, user.PasswordSalt);
+            if (!isPasswordValid)
             {
-                return Result<string>.Failure("User not found");
+                return Result<string>.Failure("Invalid email or password");
             }
 
             // 3. User bilgilerini JSON format?nda döndür (API katman?nda JWT token olu?turulacak)

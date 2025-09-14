@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TodoBackend.Api.Services;
+using TodoBackend.Infrastructure.Services;
 
 namespace TodoBackend.Api.Configs;
 
@@ -84,6 +85,7 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IJwtService, JwtService>(); // JWT Service eklendi
+        services.AddScoped<IPasswordHasher, PasswordHasher>(); // Password Hasher eklendi
 
         return services;
     }

@@ -8,10 +8,12 @@ namespace TodoBackend.Application.Features.TodoUser.Commands.UpdateUser;
 public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Result>
 {
     private readonly ITodoBackendUnitOfWork _uow;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public UpdateUserCommandHandler(ITodoBackendUnitOfWork uow)
+    public UpdateUserCommandHandler(ITodoBackendUnitOfWork uow, IPasswordHasher passwordHasher)
     {
         _uow = uow;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -26,22 +28,26 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Resul
             }
 
             // Check if new email is unique (exclude current user)
-            var isEmailUnique = await _uow.UserRepository.IsEmailUniqueAsync(request.Email, request.UserId, cancellationToken);
-            if (!isEmailUnique)
-            {
-                return Result.Failure("Email address is already in use");
-            }
-
-            // Update email only if provided using domain methods
             if (!string.IsNullOrWhiteSpace(request.Email))
             {
+                var isEmailUnique = await _uow.UserRepository.IsEmailUniqueAsync(request.Email, request.UserId, cancellationToken);
+                if (!isEmailUnique)
+                {
+                    return Result.Failure("Email address is already in use");
+                }
+
+                // Update email using domain method
                 user.ChangeEmail(request.Email);
             }
 
             // Update password only if provided using domain methods
             if (!string.IsNullOrWhiteSpace(request.Password))
             {
-                user.ChangePassword(request.Password);
+                // Hash the new password
+                var (hash, salt) = _passwordHasher.Hash(request.Password);
+
+                // Apply new password using domain method
+                user.ApplyNewPassword(hash, salt);
             }
 
             // Save changes
