@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TodoBackend.Api.Services;
 using TodoBackend.Infrastructure.Services;
+using System.Security.Cryptography;
 
 namespace TodoBackend.Api.Configs;
 
@@ -86,11 +87,12 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IJwtService, JwtService>(); // JWT Service eklendi
         services.AddScoped<IPasswordHasher, PasswordHasher>(); // Password Hasher eklendi
+        services.AddScoped<IKeyGenerationService, KeyGenerationService>(); // YENİ: Key Generation Service
 
         return services;
     }
 
-    // YENİ METHOD: JWT Authentication yapılandırması
+    // GÜNCELLENEN METHOD: JWT Authentication yapılandırması
     private static IServiceCollection RegisterAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         // JWT Token doğrulama ayarları
@@ -109,12 +111,67 @@ public static class DependencyInjection
                 ValidateIssuerSigningKey = true,                               // Token imzası doğru mu kontrol et
                 ValidIssuer = configuration["Jwt:Issuer"],                     // Geçerli token verici
                 ValidAudience = configuration["Jwt:Audience"],                 // Geçerli token alıcısı
-                IssuerSigningKey = new SymmetricSecurityKey(                   // Token imza anahtarı
-                    Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? "DefaultKey"))
+                IssuerSigningKey = GetValidationKey(configuration),            // YENİ: Asymmetric/Symmetric key seçimi
+                ClockSkew = TimeSpan.FromMinutes(5)                           // Token süre toleransı
             };
         });
 
         return services;
+    }
+
+    /// <summary>
+    /// Konfigürasyona göre token doğrulama için gerekli key'i döndürür
+    /// </summary>
+    private static SecurityKey GetValidationKey(IConfiguration configuration)
+    {
+        var useAsymmetricKeys = configuration.GetValue<bool>("Jwt:UseAsymmetricKeys");
+
+        if (useAsymmetricKeys)
+        {
+            // Production: RSA Public Key kullan
+            return GetRsaValidationKey(configuration);
+        }
+        else
+        {
+            // Development: Symmetric Key kullan
+            return GetSymmetricValidationKey(configuration);
+        }
+    }
+
+    /// <summary>
+    /// RSA public key ile token doğrulama key'i oluşturur
+    /// </summary>
+    private static SecurityKey GetRsaValidationKey(IConfiguration configuration)
+    {
+        var publicKeyPath = configuration["Jwt:PublicKeyPath"];
+        
+        if (string.IsNullOrEmpty(publicKeyPath) || !File.Exists(publicKeyPath))
+        {
+            // Fallback to symmetric key
+            return GetSymmetricValidationKey(configuration);
+        }
+
+        try
+        {
+            var publicKeyContent = File.ReadAllText(publicKeyPath);
+            var rsa = RSA.Create();
+            rsa.ImportFromPem(publicKeyContent);
+            return new RsaSecurityKey(rsa);
+        }
+        catch
+        {
+            // Fallback to symmetric key
+            return GetSymmetricValidationKey(configuration);
+        }
+    }
+
+    /// <summary>
+    /// Symmetric key ile token doğrulama key'i oluşturur
+    /// </summary>
+    private static SecurityKey GetSymmetricValidationKey(IConfiguration configuration)
+    {
+        return new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? "DefaultKey"));
     }
 
     private static IServiceCollection RegisterSwagger(this IServiceCollection services)
