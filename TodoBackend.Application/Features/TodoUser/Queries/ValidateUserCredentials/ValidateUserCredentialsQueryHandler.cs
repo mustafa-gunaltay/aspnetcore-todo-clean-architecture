@@ -7,23 +7,30 @@ namespace TodoBackend.Application.Features.TodoUser.Queries.ValidateUserCredenti
 public class ValidateUserCredentialsQueryHandler : IRequestHandler<ValidateUserCredentialsQuery, Result<bool>>
 {
     private readonly ITodoBackendUnitOfWork _uow;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public ValidateUserCredentialsQueryHandler(ITodoBackendUnitOfWork uow)
+    public ValidateUserCredentialsQueryHandler(ITodoBackendUnitOfWork uow, IPasswordHasher passwordHasher)
     {
         _uow = uow;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<bool>> Handle(ValidateUserCredentialsQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            // Validate credentials using repository method
-            var isValid = await _uow.UserRepository.ValidateCredentialsAsync(
-                request.Email, 
-                request.Password, 
-                cancellationToken);
+            // Get user by email
+            var user = await _uow.UserRepository.GetByEmailAsync(request.Email, cancellationToken);
+            
+            if (user == null)
+            {
+                return Result<bool>.Success(false, "Invalid email or password");
+            }
 
-            if (isValid)
+            // Verify password using password hasher
+            var isPasswordValid = _passwordHasher.Verify(request.Password, user.PasswordHash, user.PasswordSalt);
+
+            if (isPasswordValid)
             {
                 return Result<bool>.Success(true, "Credentials are valid");
             }

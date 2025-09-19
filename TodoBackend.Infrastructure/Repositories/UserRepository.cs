@@ -35,9 +35,9 @@ public class UserRepository : Repository<User>, IUserRepository
 
     public async Task<bool> ValidateCredentialsAsync(string email, string password, CancellationToken ct = default)
     {
-        // Email ve password eşleşen aktif user var mı kontrol et
-        return await Set.AsNoTracking()
-            .AnyAsync(u => u.Email == email && u.Password == password && !u.IsDeleted, ct);
+        // Bu method artık kullanılmıyor - password validation Application layer'da yapılıyor
+        // Backward compatibility için bırakıyoruz ama her zaman false döner
+        return false;
     }
 
     public async Task<int?> GetUserIdByEmailAsync(string email, CancellationToken ct = default)

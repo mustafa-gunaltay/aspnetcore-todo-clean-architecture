@@ -23,10 +23,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(256); // NVARCHAR(256) - DB semasina uygun
 
-
-        builder.Property(u => u.Password)
+        builder.Property(u => u.PasswordHash)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(255); // BCrypt hash genellikle 60 karakter ama güvenlik için 255
+
+        builder.Property(u => u.PasswordSalt)
+            .IsRequired()
+            .HasMaxLength(255); // Salt için yeterli alan
 
         // Audit fields - DB semasina uygun
         builder.Property(u => u.CreatedAt)

@@ -9,10 +9,12 @@ namespace TodoBackend.Application.Features.TodoUser.Commands.CreateUser;
 public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result<int>>
 {
     private readonly ITodoBackendUnitOfWork _uow;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public CreateUserCommandHandler(ITodoBackendUnitOfWork uow)
+    public CreateUserCommandHandler(ITodoBackendUnitOfWork uow, IPasswordHasher passwordHasher)
     {
         _uow = uow;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<int>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -26,8 +28,11 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
                 return Result<int>.Failure("Email address is already in use");
             }
 
-            // Create user using domain constructor
-            var user = new User(request.Email, request.Password);
+            // Hash the password
+            var (hash, salt) = _passwordHasher.Hash(request.Password);
+
+            // Create user using domain factory method with hash and salt
+            var user = User.Create(request.Email, hash, salt);
 
             // Save user
             await _uow.UserRepository.AddAsync(user, cancellationToken);

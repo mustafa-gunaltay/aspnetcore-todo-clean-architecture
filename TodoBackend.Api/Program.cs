@@ -21,6 +21,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(); // YEN?: CORS middleware - Authentication'dan önce olmal?
+
 app.UseAuthentication();  // JWT token do?rulamas?
 app.UseAuthorization();   // Yetkilendirme kontrolü
 

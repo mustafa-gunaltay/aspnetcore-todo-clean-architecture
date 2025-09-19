@@ -361,3 +361,59 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ============================================================================
+# SECURITY: SENSITIVE FILES - DO NOT COMMIT TO REPOSITORY
+# ============================================================================
+
+# RSA Keys and Certificates (JWT Authentication)
+*.pem
+*.key
+*.p12
+*.crt
+*.cer
+keys/
+certificates/
+*.backup
+
+# JWT specific keys
+jwt-private.pem
+jwt-public.pem
+*.private.pem
+*.public.pem
+
+# Configuration files with secrets
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Local.json
+appsettings.Development.Local.json
+secrets.json
+.env
+.env.local
+.env.production
+.env.staging
+
+# Connection strings and API keys
+connectionstrings.json
+apikeys.json
+
+# Database files (if using SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# Cloud provider configuration
+.azure/
+.aws/
+azurerm.tf
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+
+# IDE specific security files
+.vscode/settings.json
+.idea/
+
+# Logs that might contain sensitive data
+*.sensitive.log
+security.log
