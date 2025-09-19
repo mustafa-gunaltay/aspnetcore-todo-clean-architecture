@@ -31,7 +31,8 @@ public static class DependencyInjection
             .RegisterMediatR()
             .RegisterValidators()
             .RegisterCurrentUser()
-            .RegisterAuthentication(configuration)  // YENİ: Authentication eklendi
+            .RegisterAuthentication(configuration)
+            .RegisterCors(configuration)  // YENİ: CORS eklendi
             .RegisterSwagger();
 
         return services;
@@ -172,6 +173,82 @@ public static class DependencyInjection
     {
         return new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? "DefaultKey"));
+    }
+
+    // YENİ METHOD: CORS yapılandırması
+    private static IServiceCollection RegisterCors(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddCors(options =>
+        {
+            // Development policy - daha esnek
+            options.AddPolicy("DevelopmentPolicy", policy =>
+            {
+                policy.WithOrigins(
+                        "https://localhost:3000",    // React development server
+                        "https://localhost:3001",    // Alternative React port
+                        "https://localhost:4200",    // Angular development server
+                        "https://localhost:5173",    // Vite development server
+                        "https://localhost:8080",    // Vue.js development server
+                        "http://localhost:3000",     // HTTP versions for development
+                        "http://localhost:3001",
+                        "http://localhost:4200",
+                        "http://localhost:5173",
+                        "http://localhost:8080"
+                      )
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
+
+            // Production policy - daha kısıtlı
+            options.AddPolicy("ProductionPolicy", policy =>
+            {
+                var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+                                   ?? new[] { "https://yourdomain.com" };
+                
+                policy.WithOrigins(allowedOrigins)
+                      .WithHeaders("Content-Type", "Authorization", "X-Requested-With")
+                      .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                      .AllowCredentials();
+            });
+
+            // Default policy - environment'a göre seçilir
+            options.AddDefaultPolicy(policy =>
+            {
+                var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+                
+                if (environment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Development: Esnek CORS
+                    policy.WithOrigins(
+                            "https://localhost:3000",
+                            "https://localhost:3001", 
+                            "https://localhost:4200",
+                            "https://localhost:5173",
+                            "http://localhost:3000",
+                            "http://localhost:3001",
+                            "http://localhost:4200",
+                            "http://localhost:5173"
+                          )
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                }
+                else
+                {
+                    // Production: Kısıtlı CORS
+                    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+                                       ?? new[] { "https://yourdomain.com" };
+                    
+                    policy.WithOrigins(allowedOrigins)
+                          .WithHeaders("Content-Type", "Authorization", "X-Requested-With")
+                          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                          .AllowCredentials();
+                }
+            });
+        });
+
+        return services;
     }
 
     private static IServiceCollection RegisterSwagger(this IServiceCollection services)
