@@ -32,7 +32,7 @@ public static class DependencyInjection
             .RegisterValidators()
             .RegisterCurrentUser()
             .RegisterAuthentication(configuration)
-            .RegisterCors(configuration)  // YENİ: CORS eklendi
+            .RegisterCors(configuration)
             .RegisterSwagger();
 
         return services;
@@ -93,7 +93,6 @@ public static class DependencyInjection
         return services;
     }
 
-    // GÜNCELLENEN METHOD: JWT Authentication yapılandırması
     private static IServiceCollection RegisterAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         // JWT Token doğrulama ayarları
@@ -175,7 +174,6 @@ public static class DependencyInjection
             Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? "DefaultKey"));
     }
 
-    // YENİ METHOD: CORS yapılandırması
     private static IServiceCollection RegisterCors(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddCors(options =>

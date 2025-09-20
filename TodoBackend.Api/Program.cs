@@ -1,31 +1,34 @@
+using Serilog;
 using TodoBackend.Api.Configs;
 
-var builder = WebApplication.CreateBuilder(args);
+// Serilog konfigürasyonu
+AppUseExtensions.ConfigureSerilog();
 
-// Add services to the container.
-builder.Services.Register(builder.Configuration);
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Log.Information("Starting TodoBackend API");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Serilog'u Host'a ekle ve Services'i register et
+    builder.AddSerilog();
+    builder.Services.Register(builder.Configuration);
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+
+    var app = builder.Build();
+
+    // Middleware pipeline'?n? yap?land?r
+    app.AppUse(builder.Configuration);
+
+    Log.Information("TodoBackend API started successfully");
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseCors(); // YEN?: CORS middleware - Authentication'dan önce olmal?
-
-app.UseAuthentication();  // JWT token do?rulamas?
-app.UseAuthorization();   // Yetkilendirme kontrolü
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "TodoBackend API failed to start");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
