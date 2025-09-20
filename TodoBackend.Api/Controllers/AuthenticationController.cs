@@ -38,13 +38,9 @@ public class AuthenticationController : ControllerBase
 
             // JWT Token olu?tur
             var token = _jwtService.GenerateToken(userId, email);
-
-            // Token'? döndür
-            return Ok(new { 
-                isSuccess = true, 
-                value = token, 
-                successes = new[] { "Login successful" } 
-            });
+            // Token'i Result objesine ekle
+            result.AddValue(token);
+            return Ok(result);
         }
 
         // Validation errors için 400 Bad Request

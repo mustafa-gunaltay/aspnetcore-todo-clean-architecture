@@ -19,14 +19,14 @@ public class Result<T> : Result
         Value = value;
     }
 
-    public bool HasValue => Value != null;
+    public override bool HasValue => Value != null; // Result<T> class içinde override 
 
     // Implicit conversion operators for cleaner usage
     public static implicit operator Result<T>(T value) => Success(value);
     public static implicit operator T?(Result<T> result) => result.Value;
 
     // Factory methods specifically for generic result
-    public static new Result<T> Success(T value, string? message = null)
+    public static Result<T> Success(T value, string? message = null)
     {
         var result = new Result<T> { IsSuccess = true };
         result.AddValue(value);
@@ -58,10 +58,14 @@ public class Result<T> : Result
 public class Result
 {
     #region Properties
+    public virtual bool HasValue => false;  // Base class için her zaman false
     public bool IsSuccess { get; protected set; }
     public List<string> Errors { get; protected set; } = [];
     public Dictionary<string, string[]> ValidationErrors { get; protected set; } = [];
     public List<string> Successes { get; protected set; } = [];
+    public bool HasValidationErrors => ValidationErrors.Any(); // validation error control
+    public bool HasErrors => Errors.Any() || HasValidationErrors; // general error control
+
     #endregion
 
     #region Factory Methods
@@ -224,11 +228,11 @@ public class Result
         IsSuccess = false;
     }
 
-    public bool HasValidationErrors => ValidationErrors.Any();
-    public bool HasErrors => Errors.Any() || HasValidationErrors;
+    
     public string GetFirstError() => Errors.FirstOrDefault() ?? "Unknown error occurred.";
     public string GetAllErrorsAsString() => string.Join("; ", Errors);
     #endregion
+    
 }
 
 
