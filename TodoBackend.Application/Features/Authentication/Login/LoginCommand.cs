@@ -1,13 +1,13 @@
-using MediatR;
+嚜簑sing MediatR;
 using TodoBackend.Application.Features.BuildingBlocks;
 
 namespace TodoBackend.Application.Features.Authentication.Login;
 
 /// <summary>
-/// Kullan?c?n?n giri? yapmak i蓾n g霵derdi?i email ve password bilgileri
+/// Kullan?c?n?n giri? yapmak i癟in g繹nderdi?i email ve password bilgileri
 /// Bu command MediatR pattern'i kullanarak login i?lemini ba?lat?r
 /// </summary>
 public record LoginCommand(
-    string Email,      // Kullan?c?n?n email adresi
-    string Password    // Kullan?c?n?n ?ifresi
-) : IRequest<Result<string>>;  // String = JWT Token d霵er
+    string Email,      // Kullan覺c覺n覺n email adresi
+    string Password    // Kullan覺c覺n覺n ��ifresi
+) : IRequest<Result<string>>;  // String = JWT Token d繹ner
