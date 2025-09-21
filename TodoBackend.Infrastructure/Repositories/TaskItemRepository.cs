@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TodoBackend.Domain.Enums;
 using TodoBackend.Domain.Interfaces;
 using TodoBackend.Domain.Models;
@@ -15,8 +16,8 @@ public class TaskItemRepository : Repository<TaskItem>, ITaskItemRepository
 {
     private readonly ICurrentUser _currentUser;
 
-    public TaskItemRepository(TodoBackendDbContext dbContext, ICurrentUser currentUser) 
-        : base(dbContext, currentUser)
+    public TaskItemRepository(TodoBackendDbContext dbContext, ICurrentUser currentUser, ILogger<Repository<TaskItem>> logger) 
+        : base(dbContext, currentUser, logger)
     {
         _currentUser = currentUser;
     }

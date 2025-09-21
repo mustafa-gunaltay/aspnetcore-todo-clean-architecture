@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TodoBackend.Domain.Interfaces;
 using TodoBackend.Domain.Interfaces.BuildingBlocks;
 using TodoBackend.Domain.Models;
@@ -13,8 +14,8 @@ namespace TodoBackend.Infrastructure.Repositories;
 
 public class UserRepository : Repository<User>, IUserRepository
 {
-    public UserRepository(TodoBackendDbContext dbContext, ICurrentUser currentUser) 
-        : base(dbContext, currentUser)
+    public UserRepository(TodoBackendDbContext dbContext, ICurrentUser currentUser, ILogger<Repository<User>> logger) 
+        : base(dbContext, currentUser, logger)
     {
     }
 

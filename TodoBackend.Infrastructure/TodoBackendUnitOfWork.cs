@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using TodoBackend.Domain.Interfaces;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
 
@@ -17,11 +18,12 @@ public class TodoBackendUnitOfWork : UnitOfWork, ITodoBackendUnitOfWork
 
     public TodoBackendUnitOfWork(
         TodoBackendDbContext dbcontext,
+        ILogger<UnitOfWork> logger,
         ICategoryRepository categoryRepository,
         ITaskItemRepository taskItemRepository,
         IUserRepository userRepository,
         ITaskItemCategoryRepository taskItemCategoryRepository)
-        : base(dbcontext)
+        : base(dbcontext, logger)
     {
         CategoryRepository = categoryRepository;
         TaskItemRepository = taskItemRepository;

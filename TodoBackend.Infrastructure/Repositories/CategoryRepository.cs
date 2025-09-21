@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TodoBackend.Domain.Interfaces;
 using TodoBackend.Domain.Models;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
@@ -11,8 +12,8 @@ namespace TodoBackend.Infrastructure.Repositories;
 
 public class CategoryRepository : Repository<Category>, ICategoryRepository 
 {
-    public CategoryRepository(TodoBackendDbContext dbContext, ICurrentUser currentUser) : 
-        base(dbContext, currentUser)
+    public CategoryRepository(TodoBackendDbContext dbContext, ICurrentUser currentUser, ILogger<Repository<Category>> logger) : 
+        base(dbContext, currentUser, logger)
     {
     }   
 
