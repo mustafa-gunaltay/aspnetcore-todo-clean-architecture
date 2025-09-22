@@ -21,7 +21,9 @@ public class UserRepository : Repository<User>, IUserRepository
 
     public async Task<bool> IsEmailUniqueAsync(string email, int? excludeId = null, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().Where(u => u.Email == email && !u.IsDeleted);
+        // Firstly IgnoreQueryFilters in order to find if there is an email of soft deleted user in DB
+        var query = Set.IgnoreQueryFilters().AsNoTracking().Where(u => u.Email == email); 
+        Console.WriteLine(query);
         if (excludeId.HasValue)
             query = query.Where(u => u.Id != excludeId.Value);
         return !await query.AnyAsync(ct);

@@ -19,7 +19,8 @@ public class CategoryRepository : Repository<Category>, ICategoryRepository
 
     public async Task<bool> IsNameUniqueAsync(string name, int? excludeId = null, CancellationToken ct = default)
     {
-        var query = Set.AsNoTracking().Where(c => c.Name == name && !c.IsDeleted);
+        // Firstly IgnoreQueryFilters in order to find if there is a name of soft deleted category in DB
+        var query = Set.IgnoreQueryFilters().AsNoTracking().Where(c => c.Name == name);
         if (excludeId.HasValue)
             query = query.Where(c => c.Id != excludeId.Value);
         return !await query.AnyAsync(ct);
