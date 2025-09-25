@@ -27,8 +27,8 @@ public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery,
         
         try
         {
-            _logger.LogDebug("Fetching category with ID {CategoryId} from repository", request.CategoryId);
-            var category = await _uow.CategoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
+            _logger.LogDebug("Fetching category with ID {CategoryId} including user information from repository", request.CategoryId);
+            var category = await _uow.CategoryRepository.GetByIdWithUserAsync(request.CategoryId, cancellationToken);
             if (category is null)
             {
                 stopwatch.Stop();
@@ -38,8 +38,10 @@ public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery,
             }
 
             var categoryName = category.Name; // Store for logging
-            _logger.LogDebug("Found category ID {CategoryId} ({CategoryName}) with {TaskCount} associated tasks", 
-                category.Id, categoryName, category.TaskItemCategories.Count);
+            var userEmail = category.User?.Email ?? "Unknown"; // Store for logging
+            
+            _logger.LogDebug("Found category ID {CategoryId} ({CategoryName}) belonging to user {UserEmail} with {TaskCount} associated tasks", 
+                category.Id, categoryName, userEmail, category.TaskItemCategories.Count);
 
             var viewModel = new CategoryViewModel
             {
@@ -47,14 +49,19 @@ public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery,
                 Name = category.Name,
                 Description = category.Description,
                 TaskCount = category.TaskItemCategories.Count,
+                User = category.User != null ? new UserSummaryViewModel
+                {
+                    Id = category.User.Id,
+                    Email = category.User.Email
+                } : null,
                 CreatedAt = category.CreatedAt,
                 UpdatedAt = category.UpdatedAt
             };
 
             stopwatch.Stop();
             
-            _logger.LogInformation("Successfully retrieved category ID {CategoryId} ({CategoryName}) in {Duration}ms", 
-                request.CategoryId, categoryName, stopwatch.ElapsedMilliseconds);
+            _logger.LogInformation("Successfully retrieved category ID {CategoryId} ({CategoryName}) for user {UserEmail} in {Duration}ms", 
+                request.CategoryId, categoryName, userEmail, stopwatch.ElapsedMilliseconds);
 
             // Performance monitoring for single entity queries
             if (stopwatch.ElapsedMilliseconds > 200)

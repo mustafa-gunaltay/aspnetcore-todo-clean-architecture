@@ -11,7 +11,10 @@ public class Category : BuildingBlocks.AuditableEntity
 {
     public string Name { get; private set; } = string.Empty; // NOT NULL, private setter
     public string Description { get; private set; } = string.Empty; // NOT NULL, private setter
+    public int UserId { get; private set; } // NOT NULL, FK
 
+    // Navigation properties
+    public User? User { get; set; }
     // Many-to-many navigation - TaskItemCategory üzerinden
     public ICollection<TaskItemCategory> TaskItemCategories { get; set; } = new List<TaskItemCategory>();
 
@@ -23,15 +26,18 @@ public class Category : BuildingBlocks.AuditableEntity
     }
 
     // İş kurallarını zorlayan constructor
-    public Category(string name, string description)
+    public Category(string name, string description, int userId)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Category name is required.");
         if (string.IsNullOrWhiteSpace(description))
             throw new DomainException("Category description is required.");
+        if (userId <= 0)
+            throw new DomainException("Valid UserId is required.");
 
         Name = name.Trim();
         Description = description.Trim();
+        UserId = userId;
     }
 
     public void Rename(string name)

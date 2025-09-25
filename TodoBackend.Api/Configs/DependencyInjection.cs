@@ -10,13 +10,13 @@ using TodoBackend.Domain.Models;
 using TodoBackend.Infrastructure;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
 using TodoBackend.Infrastructure.Repositories;
+using TodoBackend.Infrastructure.Services;
 using TodoBackend.Application.Features.BuildingBlocks.Behaviors;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TodoBackend.Api.Services;
-using TodoBackend.Infrastructure.Services;
 using System.Security.Cryptography;
 
 namespace TodoBackend.Api.Configs;
@@ -89,6 +89,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>(); // JWT Service eklendi
         services.AddScoped<IPasswordHasher, PasswordHasher>(); // Password Hasher eklendi
         services.AddScoped<IKeyGenerationService, KeyGenerationService>(); // YENİ: Key Generation Service
+        services.AddScoped<IAuthenticationValidationService, AuthenticationValidationService>(); // YENİ: Authentication Validation Service
 
         return services;
     }

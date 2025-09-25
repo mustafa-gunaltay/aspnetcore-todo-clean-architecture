@@ -13,5 +13,8 @@ public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCo
         RuleFor(v => v.Description)
             .NotEmpty().WithMessage("Category description is required")
             .MaximumLength(500).WithMessage("Category description must not exceed 500 characters");
+
+        RuleFor(v => v.UserId)
+            .GreaterThan(0).WithMessage("Valid UserId is required");
     }
 }

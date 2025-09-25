@@ -71,6 +71,7 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
         return await Set.AsNoTracking()
             .Where(tc => tc.TaskItemId == taskItemId && !tc.IsDeleted)
             .Include(tc => tc.Category)
+                .ThenInclude(c => c.User) // User bilgisini de dahil et
             .ToListAsync(ct);
     }
 
@@ -79,6 +80,8 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
         return await Set.AsNoTracking()
             .Where(tc => tc.CategoryId == categoryId && !tc.IsDeleted)
             .Include(tc => tc.TaskItem)
+                .ThenInclude(ti => ti.User) // TaskItem'ın User bilgisini include et (UserEmail için)
+                    .ThenInclude(c => c.Categories)
             .ToListAsync(ct);
     }
 

@@ -45,7 +45,7 @@ public class CurrentUser : ICurrentUser
     {
         get
         {
-            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirstValue("UserId");
+            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
             
             if (int.TryParse(userIdClaim, out int userId))
             {
