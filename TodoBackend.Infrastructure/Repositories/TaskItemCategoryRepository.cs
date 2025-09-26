@@ -21,8 +21,10 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
     // YENİ: Gereksinim 8 - Görevler kategorilere bağlanabilmelidir
     public async Task<bool> AssignTaskToCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default)
     {
-        // Zaten atanmış mı kontrol et
-        var existingRelation = await GetByTaskAndCategoryAsync(taskItemId, categoryId, ct);
+        
+        // Zaten atanmış mı kontrol et 
+        var existingRelation = Set.IgnoreQueryFilters().AsNoTracking()
+            .FirstOrDefault(tc => tc.TaskItemId == taskItemId && tc.CategoryId == categoryId);
         if (existingRelation != null && !existingRelation.IsDeleted)
             return false; // Zaten atanmış
 
@@ -71,6 +73,7 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
         return await Set.AsNoTracking()
             .Where(tc => tc.TaskItemId == taskItemId && !tc.IsDeleted)
             .Include(tc => tc.Category)
+                .ThenInclude(c => c.User) // User bilgisini de dahil et
             .ToListAsync(ct);
     }
 
@@ -79,6 +82,8 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
         return await Set.AsNoTracking()
             .Where(tc => tc.CategoryId == categoryId && !tc.IsDeleted)
             .Include(tc => tc.TaskItem)
+                .ThenInclude(ti => ti.User) // TaskItem'ın User bilgisini include et (UserEmail için)
+                    .ThenInclude(c => c.Categories)
             .ToListAsync(ct);
     }
 

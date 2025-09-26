@@ -10,16 +10,22 @@ public class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCo
         RuleFor(v => v.CategoryId)
             .GreaterThan(0).WithMessage("CategoryId must be greater than 0");
 
-        // Name zorunlu ve uzunluk k?s?tlamalar? (Database: NVARCHAR(100))
-        RuleFor(v => v.Name)
-            .NotEmpty().WithMessage("Category name is required")
-            .MaximumLength(100).WithMessage("Category name must not exceed 100 characters")
-            .Must(name => !string.IsNullOrWhiteSpace(name)).WithMessage("Category name cannot be empty or whitespace");
+        // UserId zorunlu ve pozitif olmal? - security için
+        RuleFor(v => v.UserId)
+            .GreaterThan(0).WithMessage("Valid UserId is required");
 
-        // Description zorunlu ve uzunluk k?s?tlamalar? (Database: NVARCHAR(400))
+        // Name varsa validasyon yap (null = de?i?iklik yok)
+        RuleFor(v => v.Name)
+            .NotEmpty().WithMessage("Category name cannot be empty")
+            .MaximumLength(100).WithMessage("Category name must not exceed 100 characters")
+            .Must(name => !string.IsNullOrWhiteSpace(name)).WithMessage("Category name cannot be empty or whitespace")
+            .When(v => v.Name != null);
+
+        // Description varsa validasyon yap (null = de?i?iklik yok)
         RuleFor(v => v.Description)
-            .NotEmpty().WithMessage("Category description is required")
+            .NotEmpty().WithMessage("Category description cannot be empty")
             .MaximumLength(400).WithMessage("Category description must not exceed 400 characters")
-            .Must(desc => !string.IsNullOrWhiteSpace(desc)).WithMessage("Category description cannot be empty or whitespace");
+            .Must(desc => !string.IsNullOrWhiteSpace(desc)).WithMessage("Category description cannot be empty or whitespace")
+            .When(v => v.Description != null);
     }
 }

@@ -4,7 +4,7 @@ using TodoBackend.Application.ViewModels;
 
 namespace TodoBackend.Application.Features.TodoCategory.Queries.GetCategoriesByTaskItem;
 
-public record GetCategoriesByTaskItemQuery : IRequest<Result<IReadOnlyList<CategorySummaryViewModel>>>
+public record GetCategoriesByTaskItemQuery : IRequest<Result<IReadOnlyList<CategoryViewModel>>>
 {
     public int TaskItemId { get; init; }
 

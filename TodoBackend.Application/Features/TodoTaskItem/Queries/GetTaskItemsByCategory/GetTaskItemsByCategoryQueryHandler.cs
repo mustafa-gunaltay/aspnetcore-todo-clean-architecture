@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Application.ViewModels;
 using TodoBackend.Domain.Interfaces;
+using TodoBackend.Domain.Models;
 using System.Diagnostics;
 
 namespace TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByCategory;
@@ -40,12 +41,37 @@ public class GetTaskItemsByCategoryQueryHandler : IRequestHandler<GetTaskItemsBy
                 request.CategoryId, categoryName);
 
             // Get TaskItemCategory relations for this category
+            // Repository includes: TaskItem -> User (but NOT TaskItem.TaskItemCategories)
             var taskItemCategories = await _uow.TaskItemCategoryRepository.GetTaskItemsByCategoryIdAsync(request.CategoryId, cancellationToken);
 
             _logger.LogDebug("Retrieved {TaskRelationCount} task-category relations for category ID {CategoryId}", 
                 taskItemCategories.Count, request.CategoryId);
 
-            // Map to TaskItemViewModels
+            // Extract unique TaskItem IDs to fetch their categories separately
+            var taskItemIds = taskItemCategories.Select(tic => tic.TaskItem.Id).Distinct().ToList();
+            
+            // Create a dictionary to store categories for each TaskItem
+            var taskItemCategoriesMap = new Dictionary<int, List<CategorySummaryViewModel>>();
+            
+            // Fetch categories for each TaskItem separately to avoid circular reference issues
+            if (taskItemIds.Any())
+            {
+                foreach (var taskItemId in taskItemIds)
+                {
+                    var categoriesForTask = await _uow.TaskItemCategoryRepository.GetCategoriesByTaskItemIdAsync(taskItemId, cancellationToken);
+                    
+                    taskItemCategoriesMap[taskItemId] = categoriesForTask
+                        .Where(tc => !tc.IsDeleted)
+                        .Select(tc => new CategorySummaryViewModel
+                        {
+                            Id = tc.Category.Id,
+                            Name = tc.Category.Name // This works because GetCategoriesByTaskItemIdAsync includes Category
+                        })
+                        .ToList();
+                }
+            }
+
+            // Map to TaskItemViewModels using the repository's include structure
             var taskItemViewModels = taskItemCategories.Select(tic => new TaskItemViewModel
             {
                 Id = tic.TaskItem.Id,
@@ -56,16 +82,10 @@ public class GetTaskItemsByCategoryQueryHandler : IRequestHandler<GetTaskItemsBy
                 CompletedAt = tic.TaskItem.CompletedAt,
                 IsCompleted = tic.TaskItem.IsCompleted,
                 UserId = tic.TaskItem.UserId,
-                UserEmail = tic.TaskItem.User?.Email,
+                UserEmail = tic.TaskItem.User?.Email, // ? This works because repository includes TaskItem.User
                 CreatedAt = tic.TaskItem.CreatedAt,
                 UpdatedAt = tic.TaskItem.UpdatedAt,
-                Categories = tic.TaskItem.TaskItemCategories
-                    ?.Where(tc => !tc.IsDeleted)
-                    .Select(tc => new CategorySummaryViewModel
-                    {
-                        Id = tc.CategoryId,
-                        Name = tc.Category?.Name ?? "Unknown"
-                    }).ToList() ?? new List<CategorySummaryViewModel>()
+                Categories = taskItemCategoriesMap.GetValueOrDefault(tic.TaskItem.Id, new List<CategorySummaryViewModel>())
             }).ToList();
 
             stopwatch.Stop();

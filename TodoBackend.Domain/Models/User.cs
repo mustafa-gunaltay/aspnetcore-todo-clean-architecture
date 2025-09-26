@@ -14,8 +14,9 @@ public class User : BuildingBlocks.AuditableEntity
     public string PasswordHash { get; private set; } = string.Empty; // NOT NULL, private setter
     public string PasswordSalt { get; private set; } = string.Empty; // NOT NULL, private setter
 
-    // Navigation property - 1 to Many
+    // Navigation properties - 1 to Many
     public ICollection<TaskItem> TaskItems { get; set; } = new List<TaskItem>();
+    public ICollection<Category> Categories { get; set; } = new List<Category>();
 
     // Parametresiz constructor - EF Core için
     private User()

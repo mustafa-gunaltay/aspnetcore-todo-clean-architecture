@@ -4,4 +4,5 @@ namespace TodoBackend.Domain.Interfaces;
 public interface ICurrentUser
 {
     string UserName { get; }
+    int? UserId { get; } // Giri? yapm?? kullan?c?n?n ID'si
 }

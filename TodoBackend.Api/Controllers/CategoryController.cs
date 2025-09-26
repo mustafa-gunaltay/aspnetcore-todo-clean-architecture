@@ -9,6 +9,7 @@ using TodoBackend.Application.Features.TodoCategory.Commands.UpdateCategory;
 using TodoBackend.Application.Features.TodoCategory.Queries.GetAllCategories;
 using TodoBackend.Application.Features.TodoCategory.Queries.GetCategoryById;
 using TodoBackend.Application.Features.TodoCategory.Queries.GetCategoriesByTaskItem;
+using TodoBackend.Application.Features.TodoCategory.Queries.GetCategoriesByUserId;
 
 namespace TodoBackend.Api.Controllers;
 
@@ -80,6 +81,34 @@ public class CategoryController : ControllerBase
             
         // Kaynak bulunamadı için 404 Not Found
         return NotFound(result);
+    }
+
+    [HttpGet("user/{userId}")]
+    //[SwaggerOperation("Get Categories by User Id")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Categories retrieved successfully", typeof(Result<IReadOnlyList<TodoBackend.Application.ViewModels.CategoryViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<IReadOnlyList<TodoBackend.Application.ViewModels.CategoryViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(Result<IReadOnlyList<TodoBackend.Application.ViewModels.CategoryViewModel>>))]
+    public async Task<IActionResult> GetCategoriesByUserId(
+        int userId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetCategoriesByUserIdQuery(userId), cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // User not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
     }
 
     [HttpPut("{id}")]

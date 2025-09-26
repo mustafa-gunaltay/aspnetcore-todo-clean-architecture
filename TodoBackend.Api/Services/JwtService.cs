@@ -39,8 +39,8 @@ public class JwtService : IJwtService
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, userId),   // Kullan?c? ID'si
-            new Claim(ClaimTypes.Email, email),             // Email adresi
-            new Claim("UserId", userId)                     // Ekstra UserId claim
+            new Claim(ClaimTypes.Email, email)             // Email adresi
+           // new Claim("UserId", userId)                     // Ekstra UserId claim
         };
 
         // Token'? olu?tur

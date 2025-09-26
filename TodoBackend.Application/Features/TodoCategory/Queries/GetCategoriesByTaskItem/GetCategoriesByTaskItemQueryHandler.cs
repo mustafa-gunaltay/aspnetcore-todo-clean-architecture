@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace TodoBackend.Application.Features.TodoCategory.Queries.GetCategoriesByTaskItem;
 
-public class GetCategoriesByTaskItemQueryHandler : IRequestHandler<GetCategoriesByTaskItemQuery, Result<IReadOnlyList<CategorySummaryViewModel>>>
+public class GetCategoriesByTaskItemQueryHandler : IRequestHandler<GetCategoriesByTaskItemQuery, Result<IReadOnlyList<CategoryViewModel>>>
 {
     private readonly ITodoBackendUnitOfWork _uow;
     private readonly ILogger<GetCategoriesByTaskItemQueryHandler> _logger;
@@ -18,7 +18,7 @@ public class GetCategoriesByTaskItemQueryHandler : IRequestHandler<GetCategories
         _logger = logger;
     }
 
-    public async Task<Result<IReadOnlyList<CategorySummaryViewModel>>> Handle(GetCategoriesByTaskItemQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<CategoryViewModel>>> Handle(GetCategoriesByTaskItemQuery request, CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();
         
@@ -34,11 +34,11 @@ public class GetCategoriesByTaskItemQueryHandler : IRequestHandler<GetCategories
                 stopwatch.Stop();
                 _logger.LogWarning("Task item with ID {TaskItemId} not found after {Duration}ms", 
                     request.TaskItemId, stopwatch.ElapsedMilliseconds);
-                return Result<IReadOnlyList<CategorySummaryViewModel>>.Failure("Task item not found");
+                return Result<IReadOnlyList<CategoryViewModel>>.Failure("Task item not found");
             }
 
             var taskItemTitle = taskItem.Title; // Store for logging
-            _logger.LogDebug("Found task item ID {TaskItemId} ({TaskItemTitle}), fetching associated categories", 
+            _logger.LogDebug("Found task item ID {TaskItemId} ({TaskItemTitle}), fetching associated categories with user information", 
                 request.TaskItemId, taskItemTitle);
 
             // Get TaskItemCategory relations for this task item
@@ -47,17 +47,26 @@ public class GetCategoriesByTaskItemQueryHandler : IRequestHandler<GetCategories
             _logger.LogDebug("Retrieved {CategoryCount} category relations for task item ID {TaskItemId}", 
                 taskItemCategories.Count, request.TaskItemId);
 
-            // Map to CategorySummaryViewModels
-            var categorySummaryViewModels = taskItemCategories.Select(tic => new CategorySummaryViewModel
+            // Map to CategoryViewModels
+            var categoryViewModels = taskItemCategories.Select(tic => new CategoryViewModel
             {
                 Id = tic.Category.Id,
-                Name = tic.Category.Name
+                Name = tic.Category.Name,
+                Description = tic.Category.Description,
+                TaskCount = tic.Category.TaskItemCategories?.Count ?? 0, // Task count might not be accurate here
+                User = tic.Category.User != null ? new UserSummaryViewModel
+                {
+                    Id = tic.Category.User.Id,
+                    Email = tic.Category.User.Email
+                } : null,
+                CreatedAt = tic.Category.CreatedAt,
+                UpdatedAt = tic.Category.UpdatedAt
             }).ToList();
 
             stopwatch.Stop();
             
-            _logger.LogInformation("Successfully retrieved {CategoryCount} categories for task item ID {TaskItemId} ({TaskItemTitle}) in {Duration}ms", 
-                categorySummaryViewModels.Count, request.TaskItemId, taskItemTitle, stopwatch.ElapsedMilliseconds);
+            _logger.LogInformation("Successfully retrieved {CategoryCount} categories with user information for task item ID {TaskItemId} ({TaskItemTitle}) in {Duration}ms", 
+                categoryViewModels.Count, request.TaskItemId, taskItemTitle, stopwatch.ElapsedMilliseconds);
 
             // Performance monitoring for relational queries
             if (stopwatch.ElapsedMilliseconds > 300)
@@ -66,16 +75,16 @@ public class GetCategoriesByTaskItemQueryHandler : IRequestHandler<GetCategories
                     request.TaskItemId, stopwatch.ElapsedMilliseconds);
             }
 
-            return Result<IReadOnlyList<CategorySummaryViewModel>>.Success(
-                categorySummaryViewModels,
-                $"Retrieved {categorySummaryViewModels.Count} categories for task item '{taskItemTitle}' successfully");
+            return Result<IReadOnlyList<CategoryViewModel>>.Success(
+                categoryViewModels,
+                $"Retrieved {categoryViewModels.Count} categories for task item '{taskItemTitle}' successfully");
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
             _logger.LogError(ex, "Failed to retrieve categories for task item ID {TaskItemId} after {Duration}ms", 
                 request.TaskItemId, stopwatch.ElapsedMilliseconds);
-            return Result<IReadOnlyList<CategorySummaryViewModel>>.Failure($"Failed to retrieve categories by task item: {ex.Message}");
+            return Result<IReadOnlyList<CategoryViewModel>>.Failure($"Failed to retrieve categories by task item: {ex.Message}");
         }
     }
 }

@@ -23,12 +23,12 @@ public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuer
     {
         var stopwatch = Stopwatch.StartNew();
         
-        _logger.LogInformation("Starting retrieval of all categories");
+        _logger.LogInformation("Starting retrieval of all categories with user information");
         
         try
         {
-            // Get categories with task count using the repository method
-            _logger.LogDebug("Fetching categories with task count from repository");
+            // Get categories with task count and user information using the repository method
+            _logger.LogDebug("Fetching categories with task count and user information from repository");
             var categories = await _uow.CategoryRepository.GetCategoriesWithTaskCountAsync(cancellationToken);
 
             _logger.LogDebug("Retrieved {CategoryCount} categories from database", categories.Count);
@@ -41,6 +41,11 @@ public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuer
                     Name = c.Name,
                     Description = c.Description,
                     TaskCount = c.TaskItemCategories.Count,
+                    User = c.User != null ? new UserSummaryViewModel
+                    {
+                        Id = c.User.Id,
+                        Email = c.User.Email
+                    } : null,
                     CreatedAt = c.CreatedAt,
                     UpdatedAt = c.UpdatedAt
                 })
@@ -48,7 +53,7 @@ public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuer
 
             stopwatch.Stop();
             
-            _logger.LogInformation("Successfully retrieved {CategoryCount} categories in {Duration}ms", 
+            _logger.LogInformation("Successfully retrieved {CategoryCount} categories with user information in {Duration}ms", 
                 categoryViewModels.Count, stopwatch.ElapsedMilliseconds);
 
             // Performance monitoring for queries
