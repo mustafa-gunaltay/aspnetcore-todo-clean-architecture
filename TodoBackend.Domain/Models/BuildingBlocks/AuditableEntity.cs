@@ -37,6 +37,10 @@ public abstract class AuditableEntity : Entity
     }
 
     public void SoftDelete() => IsDeleted = true;
-    public void Restore() => IsDeleted = false;
-
+    public void Restore()
+    {
+        IsDeleted = false;
+        DeletedAt = null;
+        DeletedBy = "";
+    }
 }

@@ -21,8 +21,10 @@ public class TaskItemCategoryRepository : Repository<TaskItemCategory>, ITaskIte
     // YENİ: Gereksinim 8 - Görevler kategorilere bağlanabilmelidir
     public async Task<bool> AssignTaskToCategoryAsync(int taskItemId, int categoryId, CancellationToken ct = default)
     {
-        // Zaten atanmış mı kontrol et
-        var existingRelation = await GetByTaskAndCategoryAsync(taskItemId, categoryId, ct);
+        
+        // Zaten atanmış mı kontrol et 
+        var existingRelation = Set.IgnoreQueryFilters().AsNoTracking()
+            .FirstOrDefault(tc => tc.TaskItemId == taskItemId && tc.CategoryId == categoryId);
         if (existingRelation != null && !existingRelation.IsDeleted)
             return false; // Zaten atanmış
 
