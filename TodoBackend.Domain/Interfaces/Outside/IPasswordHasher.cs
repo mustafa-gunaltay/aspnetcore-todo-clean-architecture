@@ -1,4 +1,4 @@
-namespace TodoBackend.Domain.Interfaces;
+namespace TodoBackend.Domain.Interfaces.Outside;
 
 /// <summary>
 /// Password hashing ve verification i?lemleri için interface

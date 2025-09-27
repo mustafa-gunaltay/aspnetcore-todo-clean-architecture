@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
-using TodoBackend.Domain.Interfaces;
+using TodoBackend.Domain.Interfaces.Inside;
+using TodoBackend.Domain.Interfaces.Outside;
 using TodoBackend.Domain.Models.BuildingBlocks;
 
 namespace TodoBackend.Infrastructure.Services;

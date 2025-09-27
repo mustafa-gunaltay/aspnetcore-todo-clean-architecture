@@ -2,7 +2,7 @@
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using TodoBackend.Application.BackgroundJobs;
+using TodoBackend.Domain.Interfaces.Outside;
 
 namespace TodoBackend.Infrastructure.Services;
 

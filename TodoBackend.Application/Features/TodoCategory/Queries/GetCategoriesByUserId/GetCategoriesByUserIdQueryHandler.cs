@@ -2,8 +2,9 @@
 using Microsoft.Extensions.Logging;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Application.ViewModels;
-using TodoBackend.Domain.Interfaces;
 using System.Diagnostics;
+using TodoBackend.Domain.Interfaces.Out;
+using TodoBackend.Domain.Interfaces.Outside;
 
 namespace TodoBackend.Application.Features.TodoCategory.Queries.GetCategoriesByUserId;
 

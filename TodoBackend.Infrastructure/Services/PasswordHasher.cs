@@ -1,5 +1,5 @@
-using TodoBackend.Domain.Interfaces;
 using BCrypt.Net;
+using TodoBackend.Domain.Interfaces.Outside;
 
 namespace TodoBackend.Infrastructure.Services;
 

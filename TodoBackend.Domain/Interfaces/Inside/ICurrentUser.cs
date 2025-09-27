@@ -1,4 +1,4 @@
-namespace TodoBackend.Domain.Interfaces;
+namespace TodoBackend.Domain.Interfaces.Inside;
 
 // DB'de domain entity'e karsilik gelen bir dosya degildir
 public interface ICurrentUser

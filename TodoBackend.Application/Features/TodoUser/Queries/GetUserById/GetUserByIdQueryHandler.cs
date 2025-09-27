@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Application.ViewModels;
 using TodoBackend.Domain.DomainExceptions;
-using TodoBackend.Domain.Interfaces;
 using System.Diagnostics;
+using TodoBackend.Domain.Interfaces.Out;
 
 namespace TodoBackend.Application.Features.TodoUser.Queries.GetUserById;
 

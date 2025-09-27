@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TodoBackend.Domain.Models;
 
-namespace TodoBackend.Domain.Interfaces;
+namespace TodoBackend.Domain.Interfaces.Out;
 
 public interface ITaskItemCategoryRepository : BuildingBlocks.IRepository<TaskItemCategory>
 {

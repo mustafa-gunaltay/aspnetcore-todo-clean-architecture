@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TodoBackend.Domain.Enums;
 using TodoBackend.Domain.Models;
 
-namespace TodoBackend.Domain.Interfaces;
+namespace TodoBackend.Domain.Interfaces.Out;
 
 public interface ITaskItemRepository : BuildingBlocks.IRepository<TaskItem>
 {

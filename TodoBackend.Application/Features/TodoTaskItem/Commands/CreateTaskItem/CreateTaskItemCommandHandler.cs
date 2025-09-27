@@ -2,9 +2,9 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Domain.DomainExceptions;
-using TodoBackend.Domain.Interfaces;
 using TodoBackend.Domain.Models;
 using System.Diagnostics;
+using TodoBackend.Domain.Interfaces.Out;
 
 namespace TodoBackend.Application.Features.TodoTaskItem.Commands.CreateTaskItem;
 

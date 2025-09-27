@@ -1,4 +1,4 @@
-namespace TodoBackend.Application.BackgroundJobs;
+namespace TodoBackend.Domain.Interfaces.Inside;
 
 public interface IEmailNotificationService
 {

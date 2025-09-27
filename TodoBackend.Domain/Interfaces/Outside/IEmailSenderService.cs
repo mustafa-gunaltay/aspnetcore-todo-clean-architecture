@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TodoBackend.Application.BackgroundJobs;
+namespace TodoBackend.Domain.Interfaces.Outside;
 
 public interface IEmailSenderService
 {

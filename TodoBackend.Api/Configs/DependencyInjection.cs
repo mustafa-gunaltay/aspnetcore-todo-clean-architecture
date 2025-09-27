@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TodoBackend.Application.Features.TodoCategory.Commands.CreateCategory;
 using TodoBackend.Domain.Enums;
-using TodoBackend.Domain.Interfaces;
 using TodoBackend.Domain.Models;
 using TodoBackend.Infrastructure;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
@@ -23,6 +22,9 @@ using Hangfire;
 using Hangfire.SqlServer;
 using TodoBackend.Application.BackgroundJobs;
 using TodoBackend.Infrastructure.BackgroundJobs;
+using TodoBackend.Domain.Interfaces.Out;
+using TodoBackend.Domain.Interfaces.Outside;
+using TodoBackend.Domain.Interfaces.Inside;
 
 namespace TodoBackend.Api.Configs;
 

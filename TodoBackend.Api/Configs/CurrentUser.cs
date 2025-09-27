@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
-using TodoBackend.Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
+using TodoBackend.Domain.Interfaces.Inside;
 
 namespace TodoBackend.Api.Configs;
 

@@ -1,6 +1,6 @@
 using TodoBackend.Domain.Models.BuildingBlocks;
 
-namespace TodoBackend.Domain.Interfaces;
+namespace TodoBackend.Domain.Interfaces.Outside;
 
 /// <summary>
 /// Service for validating authentication and authorization in command handlers

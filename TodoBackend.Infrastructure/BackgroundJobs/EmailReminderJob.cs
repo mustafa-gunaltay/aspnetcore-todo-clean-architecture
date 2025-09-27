@@ -1,6 +1,6 @@
 using Hangfire;
 using Microsoft.Extensions.Logging;
-using TodoBackend.Application.BackgroundJobs;
+using TodoBackend.Domain.Interfaces.Inside;
 
 namespace TodoBackend.Infrastructure.BackgroundJobs;
 

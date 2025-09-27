@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TodoBackend.Domain.Enums;
-using TodoBackend.Domain.Interfaces;
+using TodoBackend.Domain.Interfaces.Inside;
+using TodoBackend.Domain.Interfaces.Out;
 using TodoBackend.Domain.Models;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
 

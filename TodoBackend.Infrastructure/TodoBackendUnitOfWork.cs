@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using TodoBackend.Domain.Interfaces;
+using TodoBackend.Domain.Interfaces.Out;
 using TodoBackend.Infrastructure.BuildingBlocks.Implementations;
 
 namespace TodoBackend.Infrastructure;

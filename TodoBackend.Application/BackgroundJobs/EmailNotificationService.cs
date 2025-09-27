@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
-using TodoBackend.Domain.Interfaces;
+using TodoBackend.Domain.Interfaces.Inside;
+using TodoBackend.Domain.Interfaces.Out;
+using TodoBackend.Domain.Interfaces.Outside;
 
 namespace TodoBackend.Application.BackgroundJobs;
 
