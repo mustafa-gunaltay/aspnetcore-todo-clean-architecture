@@ -2,6 +2,9 @@
 using Serilog.Events;
 using Serilog.Filters;
 using TodoBackend.Api.Middleware;
+using Hangfire;
+using Hangfire.Dashboard;
+using TodoBackend.Infrastructure.BackgroundJobs;
 
 namespace TodoBackend.Api.Configs;
 
@@ -60,10 +63,33 @@ public static class AppUseExtensions
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // Hangfire Dashboard - Authentication'dan sonra olmalı
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            Authorization = new[] { new HangfireAuthorizationFilter() }
+        });
+
+        // Hangfire recurring jobs'ı başlat
+        SetupRecurringJobs();
+
         // Controllers - WebApplication üzerinden map et
         webApp.MapControllers();
 
         return app;
+    }
+
+    /// <summary>
+    /// Recurring job'ları ayarla
+    /// </summary>
+    private static void SetupRecurringJobs()
+    {
+        // Her 1 dakikada bir task reminder gönder
+        RecurringJob.AddOrUpdate<EmailReminderJob>(
+            "task-reminders",
+            job => job.ExecuteAsync(),
+            "*/1 * * * *"); // Cron expression: Her 1 dakika
+
+        Log.Information("Hangfire recurring jobs configured: Task reminders every 1 minutes");
     }
 
     /// <summary>
@@ -152,6 +178,21 @@ public static class AppUseExtensions
                     retainedFileCountLimit: 30,
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [DB] [{Level:u3}] [{SourceContext}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"))
             
+            // HANGFIRE LOGS - logs/infrastructure/hangfire/
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(evt => 
+                    Matching.FromSource("Hangfire").Invoke(evt) ||
+                    Matching.FromSource("TodoBackend.Infrastructure.BackgroundJobs").Invoke(evt) ||
+                    evt.MessageTemplate.Text.Contains("HANGFIRE") ||
+                    evt.MessageTemplate.Text.Contains("Background Job"))
+                .WriteTo.File(
+                    path: "logs/infrastructure/hangfire/hangfire-.log",
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    fileSizeLimitBytes: 10485760,
+                    retainedFileCountLimit: 30,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [HANGFIRE] [{Level:u3}] [{SourceContext}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"))
+            
             // API LAYER LOGS - logs/api/
             .WriteTo.Logger(lc => lc
                 .Filter.ByIncludingOnly(evt => 
@@ -230,7 +271,7 @@ public static class AppUseExtensions
 
         // Log yapısının oluşturulacağını belirt
         Log.Information("Starting TodoBackend API with hierarchical logging structure");
-        Log.Information("Log directories: application/, infrastructure/, api/, domain/, security/, http/, errors/");
+        Log.Information("Log directories: application/, infrastructure/, api/, domain/, security/, http/, errors/, hangfire/");
         Log.Information("Each layer will log to its own directory for better organization and debugging");
     }
 
@@ -241,5 +282,18 @@ public static class AppUseExtensions
     {
         builder.Host.UseSerilog();
         return builder;
+    }
+}
+
+/// <summary>
+/// Hangfire Dashboard için basit authorization filter
+/// </summary>
+public class HangfireAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        // Development ortamında herkese izin ver
+        // Production'da daha güvenli authentication eklenebilir
+        return true;
     }
 }

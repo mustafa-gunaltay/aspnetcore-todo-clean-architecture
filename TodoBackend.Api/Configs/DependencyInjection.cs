@@ -18,6 +18,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TodoBackend.Api.Services;
 using System.Security.Cryptography;
+// Hangfire imports
+using Hangfire;
+using Hangfire.SqlServer;
+using TodoBackend.Application.BackgroundJobs;
+using TodoBackend.Infrastructure.BackgroundJobs;
 
 namespace TodoBackend.Api.Configs;
 
@@ -33,7 +38,9 @@ public static class DependencyInjection
             .RegisterCurrentUser()
             .RegisterAuthentication(configuration)
             .RegisterCors(configuration)
-            .RegisterSwagger();
+            .RegisterSwagger()
+            .RegisterBackgroundJobs()
+            .RegisterHangfire(configuration);
 
         return services;
     }
@@ -117,6 +124,44 @@ public static class DependencyInjection
             };
         });
 
+        return services;
+    }
+
+    private static IServiceCollection RegisterBackgroundJobs(this IServiceCollection services)
+    {
+        // Application Services
+        services.AddScoped<IEmailNotificationService, EmailNotificationService>();
+        
+        // Infrastructure Services  
+        services.AddScoped<IEmailSenderService, EmailSenderService>();
+        services.AddScoped<EmailReminderJob>();
+        
+        return services;
+    }
+
+    private static IServiceCollection RegisterHangfire(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Hangfire configuration
+        services.AddHangfire(config =>
+        {
+            config.UseSqlServerStorage(configuration.GetConnectionString("TodoBackendDbConnection"), new SqlServerStorageOptions
+            {
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                DisableGlobalLocks = true
+            });
+        });
+        
+        // Hangfire Server
+        services.AddHangfireServer(options =>
+        {
+            options.ServerName = "TodoBackend-Server";
+            options.WorkerCount = Environment.ProcessorCount * 2;
+            options.Queues = new[] { "default", "emails" };
+        });
+        
         return services;
     }
 

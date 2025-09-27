@@ -87,7 +87,7 @@ public class TaskItemRepository : Repository<TaskItem>, ITaskItemRepository
 
     public async Task<IReadOnlyList<TaskItem>> GetOverdueTasksAsync(int userId, CancellationToken ct = default)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.Now;
         
         return await Set.AsNoTracking()
             .Include(t => t.User)
@@ -104,7 +104,7 @@ public class TaskItemRepository : Repository<TaskItem>, ITaskItemRepository
 
     public async Task<IReadOnlyList<TaskItem>> GetUpcomingTasksAsync(int userId, int days = 7, CancellationToken ct = default)
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.Now;
         var futureDate = today.AddDays(days);
         
         return await Set.AsNoTracking()
