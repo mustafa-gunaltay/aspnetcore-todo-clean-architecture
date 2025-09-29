@@ -25,6 +25,12 @@ using TodoBackend.Infrastructure.BackgroundJobs;
 using TodoBackend.Domain.Interfaces.Out;
 using TodoBackend.Domain.Interfaces.Outside;
 using TodoBackend.Domain.Interfaces.Inside;
+// Akka.NET imports
+using Akka.Actor;
+using Akka.DependencyInjection;
+using Akka.Configuration;
+using TodoBackend.Application.Actors;
+using TodoBackend.Infrastructure.Actors;
 
 namespace TodoBackend.Api.Configs;
 
@@ -42,7 +48,8 @@ public static class DependencyInjection
             .RegisterCors(configuration)
             .RegisterSwagger()
             .RegisterBackgroundJobs()
-            .RegisterHangfire(configuration);
+            .RegisterHangfire(configuration)
+            .RegisterAkkaNet(configuration); // YENİ: Akka.NET registration
 
         return services;
     }
@@ -132,11 +139,11 @@ public static class DependencyInjection
     private static IServiceCollection RegisterBackgroundJobs(this IServiceCollection services)
     {
         // Application Services
-        services.AddScoped<IEmailNotificationService, EmailNotificationService>();
+        services.AddScoped<IEmailNotificationService, EmailNotificationService>(); // Mevcut service (backward compatibility)
         
         // Infrastructure Services  
         services.AddScoped<IEmailSenderService, EmailSenderService>();
-        services.AddScoped<EmailReminderJob>();
+        services.AddScoped<EmailReminderJob>(); // Artık Actor-based çalışacak
         
         return services;
     }
@@ -163,6 +170,106 @@ public static class DependencyInjection
             options.WorkerCount = Environment.ProcessorCount * 2;
             options.Queues = new[] { "default", "emails" };
         });
+        
+        return services;
+    }
+
+    private static IServiceCollection RegisterSwagger(this IServiceCollection services)
+    {
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "TodoBackend API",
+                Version = "v1",
+                Description = "A Todo application API built with Clean Architecture",
+                Contact = new OpenApiContact
+                {
+                    Name = "TodoBackend Team",
+                    Email = "info@todobackend.com"
+                }
+            });
+
+            // Enable annotations for Swagger
+            c.EnableAnnotations();
+            
+            // YENİ: JWT Authentication için Swagger yapılandırması
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
+        
+        return services;
+    }
+
+    /// <summary>
+    /// Akka.NET Actor System configuration ve registration
+    /// Clean Architecture + Actor Model entegrasyonu
+    /// </summary>
+    private static IServiceCollection RegisterAkkaNet(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Akka.NET configuration - Basitleştirilmiş ve hata düzeltildi
+        var akkaConfig = ConfigurationFactory.ParseString(@"
+            akka {
+                actor {
+                    provider = ""Akka.Actor.LocalActorRefProvider""
+                    
+                    # Default dispatcher kullan - custom dispatcher kaldırıldı
+                    default-dispatcher {
+                        type = Dispatcher
+                        executor = ""thread-pool-executor""
+                        thread-pool-executor {
+                            fixed-pool-size = 16
+                        }
+                        throughput = 5
+                    }
+                }
+                
+                # Mailbox tanımlamaları
+                mailbox {
+                    bounded-mailbox {
+                        mailbox-type = ""Akka.Dispatch.BoundedMailbox""
+                        mailbox-capacity = 1000
+                        mailbox-push-timeout-time = 10s
+                    }
+                }
+                
+                # Logging configuration
+                loggers = [""Akka.Logger.Serilog.SerilogLogger, Akka.Logger.Serilog""]
+                logging-filter = ""Akka.Logger.Serilog.SerilogLoggingFilter, Akka.Logger.Serilog""
+                log-level = INFO
+            }
+        ");
+
+        // ActorSystem'i Singleton olarak kaydet
+        services.AddSingleton<ActorSystem>(serviceProvider =>
+        {
+            var system = ActorSystem.Create("TodoBackendActorSystem", akkaConfig);
+            return system;
+        });
+
+        // Actor-based Email Notification Service'i Singleton kaydet - ÇÖZÜM: Actor name conflict önlemi
+        services.AddSingleton<IActorEmailNotificationService, ActorEmailNotificationService>();
         
         return services;
     }
@@ -294,54 +401,6 @@ public static class DependencyInjection
             });
         });
 
-        return services;
-    }
-
-    private static IServiceCollection RegisterSwagger(this IServiceCollection services)
-    {
-        services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "TodoBackend API",
-                Version = "v1",
-                Description = "A Todo application API built with Clean Architecture",
-                Contact = new OpenApiContact
-                {
-                    Name = "TodoBackend Team",
-                    Email = "info@todobackend.com"
-                }
-            });
-
-            // Enable annotations for Swagger
-            c.EnableAnnotations();
-            
-            // YENİ: JWT Authentication için Swagger yapılandırması
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
-        
         return services;
     }
 }

@@ -1,12 +1,13 @@
 using Serilog;
 using TodoBackend.Api.Configs;
+using Akka.Actor;
 
 // Serilog konfigürasyonu
 AppUseExtensions.ConfigureSerilog();
 
 try
 {
-    Log.Information("Starting TodoBackend API");
+    Log.Information("Starting TodoBackend API with Akka.NET Actor System");
 
     var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,20 @@ try
     // Middleware pipeline'?n? yap?land?r
     app.AppUse(builder.Configuration);
 
-    Log.Information("TodoBackend API started successfully");
+    // ActorSystem lifecycle yönetimi
+    var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+    var actorSystem = app.Services.GetRequiredService<ActorSystem>();
+
+    lifetime.ApplicationStopping.Register(() =>
+    {
+        Log.Information("Gracefully shutting down Akka.NET Actor System");
+        actorSystem.Terminate().Wait(TimeSpan.FromSeconds(30));
+        Log.Information("Akka.NET Actor System shut down completed");
+    });
+
+    Log.Information("TodoBackend API started successfully with Actor System: {ActorSystemName}", 
+        actorSystem.Name);
+    
     app.Run();
 }
 catch (Exception ex)

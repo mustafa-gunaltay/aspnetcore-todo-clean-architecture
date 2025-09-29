@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Akka" Version="1.5.13" />
+    <PackageReference Include="Akka.DependencyInjection" Version="1.5.13" />
+    <PackageReference Include="Akka.Hosting" Version="1.5.13" />
     <PackageReference Include="FluentValidation" Version="12.0.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.14" />
