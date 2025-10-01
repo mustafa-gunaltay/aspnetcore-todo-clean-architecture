@@ -27,7 +27,10 @@ public static class AppUseExtensions
         // Base middleware
         app.UseHttpsRedirection();
 
-        // Correlation ID middleware - En başta olmalı
+        // YENİ: Security Headers - XSS ve diğer güvenlik korumaları için en başta olmalı
+        app.UseMiddleware<SecurityHeadersMiddleware>();
+
+        // Correlation ID middleware - Security'den sonra olmalı
         app.UseMiddleware<CorrelationIdMiddleware>();
 
         // Serilog HTTP request logging with enhanced enrichment

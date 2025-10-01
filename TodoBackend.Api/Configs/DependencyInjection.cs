@@ -82,6 +82,8 @@ public static class DependencyInjection
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssemblyContaining<CreateCategoryCommandHandler>();
+            // YENİ: Security behavior önce çalışmalı, sonra validation
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(SecurityBehavior<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
         });
         return services;
@@ -106,6 +108,9 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>(); // Password Hasher eklendi
         services.AddScoped<IKeyGenerationService, KeyGenerationService>(); // YENİ: Key Generation Service
         services.AddScoped<IAuthenticationValidationService, AuthenticationValidationService>(); // YENİ: Authentication Validation Service
+        
+        // XSS Koruması için Security Services
+        services.AddScoped<IInputSanitizer, InputSanitizer>();
 
         return services;
     }
