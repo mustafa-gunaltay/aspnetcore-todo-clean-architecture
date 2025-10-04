@@ -1,8 +1,8 @@
-using Serilog;
+嚜簑sing Serilog;
 using TodoBackend.Api.Configs;
 using Akka.Actor;
 
-// Serilog konfig�rasyonu
+// Serilog konfig羹rasyonu
 AppUseExtensions.ConfigureSerilog();
 
 try
@@ -19,10 +19,10 @@ try
 
     var app = builder.Build();
 
-    // Middleware pipeline'?n? yap?land?r
+    // Middleware pipeline'覺n覺 yap覺land覺r
     app.AppUse(builder.Configuration);
 
-    // ActorSystem lifecycle y霵etimi
+    // ActorSystem lifecycle y繹netimi
     var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
     var actorSystem = app.Services.GetRequiredService<ActorSystem>();
 

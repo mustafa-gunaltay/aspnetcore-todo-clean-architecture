@@ -11,12 +11,28 @@ public class EmailSenderService : IEmailSenderService
     private readonly IConfiguration _configuration;
     private readonly ILogger<EmailSenderService> _logger;
 
-    private static string appPassword = "tudjclcdvyjfpdtb"; // Uygulama şifresi
+    private readonly string appPassword;
+    private readonly string smtpServer;
+    private readonly int smtpPort;
+    private readonly string senderEmail;
+    private readonly string senderName;
+    private readonly bool enableSsl;
 
     public EmailSenderService(IConfiguration configuration, ILogger<EmailSenderService> logger)
     {
         _configuration = configuration;
         _logger = logger;
+        
+        // Configuration'dan değerleri al
+        appPassword = _configuration["EmailSettings:AppPassword"] ?? string.Empty;
+        smtpServer = _configuration["EmailSettings:SmtpServer"] ?? "smtp.gmail.com";
+        smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
+        senderEmail = _configuration["EmailSettings:SenderEmail"] ?? string.Empty;
+        senderName = _configuration["EmailSettings:SenderName"] ?? "TodoBackend";
+        enableSsl = bool.Parse(_configuration["EmailSettings:EnableSsl"] ?? "true");
+
+        _logger.LogInformation("EmailSenderService initialized with SMTP: {SmtpServer}:{SmtpPort}, Sender: {SenderEmail}", 
+            smtpServer, smtpPort, senderEmail);
     }
 
     public async Task SendTaskReminderAsync(string toEmail, List<string> taskTitles)
@@ -38,7 +54,7 @@ public class EmailSenderService : IEmailSenderService
             _logger.LogDebug("Sending task reminder email to {Email} with {TaskCount} tasks", 
                 toEmail, taskTitles.Count);
 
-            var fromAddress = new MailAddress("mustafagunaltay25@gmail.com", "TodoBackend");
+            var fromAddress = new MailAddress(senderEmail, senderName);
             var toAddress = new MailAddress(toEmail, "");
             string fromPassword = appPassword;
 
@@ -47,12 +63,12 @@ public class EmailSenderService : IEmailSenderService
 
             var smtp = new SmtpClient
             {
-                Host = "smtp.gmail.com",
-                Port = 587,
-                EnableSsl = true,
+                Host = smtpServer,
+                Port = smtpPort,
+                EnableSsl = enableSsl,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+                Credentials = new NetworkCredential(senderEmail, fromPassword)
             };
 
             using var message = new MailMessage(fromAddress, toAddress)
@@ -78,10 +94,10 @@ public class EmailSenderService : IEmailSenderService
         try
         {
             // SMTP sunucusuna basit bir bağlantı testi
-            using var client = new SmtpClient("smtp.gmail.com", 587);
-            client.EnableSsl = true;
+            using var client = new SmtpClient(smtpServer, smtpPort);
+            client.EnableSsl = enableSsl;
             client.UseDefaultCredentials = false;
-            client.Credentials = new NetworkCredential("mustafagunaltay25@gmail.com", appPassword);
+            client.Credentials = new NetworkCredential(senderEmail, appPassword);
             
             // Timeout ile test bağlantısı
             client.Timeout = 5000; // 5 saniye

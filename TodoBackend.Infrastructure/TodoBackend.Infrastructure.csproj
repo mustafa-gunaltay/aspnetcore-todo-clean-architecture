@@ -26,8 +26,4 @@
     <ProjectReference Include="..\TodoBackend.Domain\TodoBackend.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Decorators\" />
-  </ItemGroup>
-
 </Project>

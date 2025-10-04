@@ -39,6 +39,7 @@ public static class DependencyInjection
     public static IServiceCollection Register(this IServiceCollection services, IConfiguration configuration)
     {
         services
+            .RegisterExtendedConfiguration(configuration)
             .RegisterDbContext(configuration)
             .RegisterRepositories()
             .RegisterMediatR()
@@ -59,6 +60,21 @@ public static class DependencyInjection
         services.AddDbContext<TodoBackendDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("TodoBackendDbConnection")), // appsettings.json'daki mssql db connection stringini verir
             ServiceLifetime.Scoped);
+        return services;
+    }
+
+    private static IServiceCollection RegisterExtendedConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Configuration'ı genişlet - sensitive dosyalarını yükle
+        var configurationBuilder = new ConfigurationBuilder()
+            .AddConfiguration(configuration) // Mevcut configuration'ı ekle
+            .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables();
+
+        var enhancedConfiguration = configurationBuilder.Build();
+
+        // Enhanced configuration'ı services'e ekle
+        services.AddSingleton<IConfiguration>(enhancedConfiguration);
         return services;
     }
 
