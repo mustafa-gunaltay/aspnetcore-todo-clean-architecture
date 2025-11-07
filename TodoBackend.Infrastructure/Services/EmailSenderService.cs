@@ -51,7 +51,7 @@ public class EmailSenderService : IEmailSenderService
 
         try
         {
-            _logger.LogDebug("Sending task reminder email to {Email} with {TaskCount} tasks", 
+            _logger.LogDebug("Sending task reminder email to {Email} with {TaskCount} tasks",
                 toEmail, taskTitles.Count);
 
             var fromAddress = new MailAddress(senderEmail, senderName);
@@ -79,7 +79,7 @@ public class EmailSenderService : IEmailSenderService
             };
 
             await smtp.SendMailAsync(message);
-            
+
             _logger.LogInformation("Successfully sent task reminder email to {Email}", toEmail);
         }
         catch (Exception ex)

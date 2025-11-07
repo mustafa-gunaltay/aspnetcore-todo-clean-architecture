@@ -13,6 +13,7 @@ using TodoBackend.Application.Features.TodoTaskItem.Queries.GetOverdueTaskItems;
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByUserId;
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetUpcomingTaskItems;
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByCategory;
+using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemById;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Domain.Enums;
 
@@ -28,6 +29,32 @@ public class TaskItemController : ControllerBase
     public TaskItemController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet("{id}")]
+    //[SwaggerOperation("Get Task Item by Id")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Task retrieved successfully", typeof(Result<TaskItemViewModel>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<TaskItemViewModel>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "Task not found", typeof(Result<TaskItemViewModel>))]
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetTaskItemByIdQuery(id), cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // Task not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
     }
 
     [HttpGet("filtered-tasks")]

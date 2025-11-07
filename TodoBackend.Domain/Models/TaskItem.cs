@@ -81,11 +81,11 @@ public class TaskItem : BuildingBlocks.AuditableEntity
         if (IsCompleted)
             return;
 
-        var nowDate = DateTime.UtcNow.Date;
+        var nowDate = DateTime.Now.Date;
         if (DueDate.HasValue && DueDate.Value.Date < nowDate)
             throw new DomainException("A task with a past due date cannot be completed.");
 
-        CompletedAt = DateTime.UtcNow;
+        CompletedAt = DateTime.Now;
         IsCompleted = true;
     }
 

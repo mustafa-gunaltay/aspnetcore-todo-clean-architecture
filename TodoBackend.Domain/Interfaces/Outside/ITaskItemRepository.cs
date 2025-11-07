@@ -33,4 +33,7 @@ public interface ITaskItemRepository : BuildingBlocks.IRepository<TaskItem>
     
     // YENİ: User silindiğinde o user'ın tüm task'larını soft delete et
     Task<int> SoftDeleteAllTasksByUserIdAsync(int userId, CancellationToken ct = default);
+    
+    // YENİ: Get task by ID with User and Categories included
+    Task<TaskItem?> GetByIdWithDetailsAsync(int id, CancellationToken ct = default);
 }

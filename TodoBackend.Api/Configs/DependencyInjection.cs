@@ -361,11 +361,13 @@ public static class DependencyInjection
                         "https://localhost:3000",    // React development server
                         "https://localhost:3001",    // Alternative React port
                         "https://localhost:4200",    // Angular development server
+                        "https://localhost:4201",
                         "https://localhost:5173",    // Vite development server
                         "https://localhost:8080",    // Vue.js development server
                         "http://localhost:3000",     // HTTP versions for development
                         "http://localhost:3001",
                         "http://localhost:4200",
+                        "http://localhost:4201",
                         "http://localhost:5173",
                         "http://localhost:8080"
                       )

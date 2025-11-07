@@ -23,6 +23,15 @@ public class TaskItemRepository : Repository<TaskItem>, ITaskItemRepository
         _currentUser = currentUser;
     }
 
+    public async Task<TaskItem?> GetByIdWithDetailsAsync(int id, CancellationToken ct = default)
+    {
+        return await Set.AsNoTracking()
+            .Include(t => t.User)
+            .Include(t => t.TaskItemCategories)
+                .ThenInclude(tc => tc.Category)
+            .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted, ct);
+    }
+
     public async Task<IReadOnlyList<TaskItem>> GetTasksByUserIdAsync(int userId, CancellationToken ct = default)
     {
         return await Set.AsNoTracking()
