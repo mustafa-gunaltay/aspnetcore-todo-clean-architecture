@@ -14,6 +14,7 @@ using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByUserId
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetUpcomingTaskItems;
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByCategory;
 using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemById;
+using TodoBackend.Application.Features.TodoTaskItem.Queries.GetTaskItemsByFilter;
 using TodoBackend.Application.Features.BuildingBlocks;
 using TodoBackend.Domain.Enums;
 
@@ -50,6 +51,34 @@ public class TaskItemController : ControllerBase
             return BadRequest(result);
 
         // Task not found için 404 Not Found
+        if (result.Errors.Any(e => e.Contains("not found")))
+            return NotFound(result);
+
+        // Other errors için 400 Bad Request
+        return BadRequest(result);
+    }
+
+    [HttpGet("tasks-by-filter")]
+    //[SwaggerOperation("Get Task Items by Filter with Pagination")]
+    //[SwaggerResponse(StatusCodes.Status200OK, "Tasks retrieved successfully", typeof(Result<PagedList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status400BadRequest, "Validation Error Occurred", typeof(Result<PagedList<TaskItemViewModel>>))]
+    //[SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(Result<PagedList<TaskItemViewModel>>))]
+    public async Task<IActionResult> GetTasksByFilter(
+        [FromQuery] GetTaskItemsByFilterQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+        if (result.IsSuccess)
+        {
+            // 200 OK - Data retrieval başarılı, paginated response
+            return Ok(result);
+        }
+
+        // Validation errors için 400 Bad Request
+        if (result.HasValidationErrors)
+            return BadRequest(result);
+
+        // User not found için 404 Not Found
         if (result.Errors.Any(e => e.Contains("not found")))
             return NotFound(result);
 

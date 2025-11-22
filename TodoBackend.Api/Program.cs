@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using TodoBackend.Api.Configs;
 using Akka.Actor;
+using System.Text.Json.Serialization;
 
 // Serilog konfigürasyonu
 AppUseExtensions.ConfigureSerilog();
@@ -14,7 +15,18 @@ try
     // Serilog'u Host'a ekle ve Services'i register et
     builder.AddSerilog();
     builder.Services.Register(builder.Configuration);
-    builder.Services.AddControllers();
+    
+    // Controllers with JSON options for enum string serialization
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            // Enum'ları string olarak serialize et (0, 1, 2 yerine "Low", "Medium", "High")
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            
+            // Property name'leri camelCase olarak serialize et (opsiyonel)
+            options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        });
+    
     builder.Services.AddEndpointsApiExplorer();
 
     var app = builder.Build();
